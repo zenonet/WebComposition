@@ -1,0 +1,46 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>WebCompositionApp</title>
+    <style>
+        .button {
+            background: white;
+            border-radius: 3pt;
+            border-width: 1.2pt;
+            padding: 3pt;
+        }
+
+        .composable {
+            margin: 2pt;
+            font-family: "Segoe UI", sans-serif;
+        }
+
+        .container {
+            gap: 10pt;
+        }
+    </style>
+    <script type="module">
+
+        // Importing compiled ES module.
+        import bootsharp, {Program} from "../Runtime/bin/bootsharp/index.mjs";
+
+        // Binding 'Program.GetFrontendName' import invoked in C
+        Program.getFrontendName = () => "Browser";
+        Program.applyRecomposition = (html) => document.getElementById("root-container").innerHTML = html;
+
+        // Subscribing to 'Program.OnMainInvoked'
+        Program.onMainInvoked.subscribe(console.log);
+
+        // Initializing dotnet runtime and invoking entry point.
+        await bootsharp.boot();
+
+        // Invoking 'Program.GetBackendName' C
+        console.log(`Hello ${Program.getBackendName()}!`);
+
+    </script>
+</head>
+<body id="root-container">
+{{{Content}}}
+</body>
+</html>
