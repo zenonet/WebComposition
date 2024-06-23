@@ -6,6 +6,16 @@ public class Button : BlockComposable
 {
     public override string GenerateHtml()
     {
-        return $"<button class=\"button composable\">{ExecuteBlock()}</button>";
+        string onClick = "";
+        if (Parameters.Count > 0)
+        {
+            var onClickFunction = Parameters[0].Execute();
+            if (onClickFunction is LambdaReferenceValue lrv)
+            {
+                onClick = $"onclick=\"Program.callLambda({lrv.FunctionIndex})\"";
+            }
+        }
+
+        return $"<button class=\"button composable\" {onClick}>{ExecuteBlock()}</button>";
     }
 }
