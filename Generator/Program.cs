@@ -103,5 +103,6 @@ Parameter ParseParameter(ref string src)
 
 void WriteToOutputFile(string html)
 {
+    html = "<head><link rel=\"stylesheet\" href=\"compositionStyle.css\"></head><body>" + html + "</body>";
     File.WriteAllText(@"C:\Users\zeno\RiderProjects\WebComposition\Generator\out.html", html);
 }

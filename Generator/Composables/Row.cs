@@ -4,6 +4,6 @@ public class Row : Composable
 {
     public override string GenerateHtml(List<Parameter> parameters, string? contentHtml = null)
     {
-        return $"<div style=\"display:flex;flex-direction:row\">{contentHtml}</div>";
+        return $"<div class=\"row composable container\" style=\"display:flex;flex-direction:row\">{contentHtml}</div>";
     }
 }

@@ -4,6 +4,6 @@ public class Button : Composable
 {
     public override string GenerateHtml(List<Parameter> parameters, string? contentHtml = null)
     {
-        return $"<button>{contentHtml}</button>";
+        return $"<button class=\"button composable\">{contentHtml}</button>";
     }
 }

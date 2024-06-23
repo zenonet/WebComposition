@@ -4,6 +4,6 @@ public class Box : Composable
 {
     public override string GenerateHtml(List<Parameter> parameters, string? contentHtml = null)
     {
-        return $"<div>{contentHtml}</div>";
+        return $"<div class=\"box composable container\">{contentHtml}</div>";
     }
 }

@@ -4,6 +4,6 @@ public class Text : Composable
 {
     public override string GenerateHtml(List<Parameter> parameters, string? contentHtml = null)
     {
-        return $"{parameters[0].Value}";
+        return $"<span class=\"composable text\">{parameters[0].Value}</span>";
     }
 }

@@ -1,0 +1,15 @@
+﻿.button{
+    background: white;
+    border-radius: 3pt;
+    border-width: 1.2pt;
+    padding: 3pt;
+}
+
+.composable{
+    margin: 2pt;
+    font-family: "Segoe UI", sans-serif;
+}
+
+.container{
+    gap: 10pt;
+}

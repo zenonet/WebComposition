@@ -1,9 +1,11 @@
 ﻿Column{
-    Text("Willkommen im 1&1 shop!")
-    Button{
-        Text("kaufen")
-    }
-    Button{
-        Text("geld")
+    Text("Welcome!")
+    Row{
+        Button{
+            Text("Button A")
+        }
+        Button{
+            Text("Button B")
+        }
     }
 }
