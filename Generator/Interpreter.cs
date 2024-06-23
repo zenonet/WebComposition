@@ -8,14 +8,14 @@ public class Interpreter
 
     public Executable ParseExecutable(ref string src)
     {
-        Match match = Regex.Match(src, @"^[^\S\r\n]*(\w+) ?\(?");
+        Match match = Regex.Match(src, @"^[^\S\r\n]*([A-z]\w*) ?\(?");
         if (match.Success)
         {
             string composableName = match.Groups[1].Value;
             src = src[match.Length..];
-            if (Executable.ExecutableDefinitions.TryGetValue(composableName, out Type? executableType))
+            if (Function.ExecutableDefinitions.TryGetValue(composableName, out Type? executableType))
             {
-                Executable exe = (Executable) Activator.CreateInstance(executableType)!;
+                Function exe = (Function) Activator.CreateInstance(executableType)!;
 
                 var parameters = new List<Executable>();
                 if (src[0] == '{' && exe is BlockComposable) goto block;
@@ -48,6 +48,13 @@ public class Interpreter
         {
             src = src[match.Length..];
             return new ValueCall(new StringValue {Value = Regex.Replace(match.Groups[1].Value, @"\\(.)", "$1")});
+        }
+        
+        match = Regex.Match(src, @"-?\d+");
+        if (match.Success)
+        {
+            src = src[match.Length..];
+            return new ValueCall(new IntValue {Value = int.Parse(match.Value)});
         }
         throw new($"Invalid syntax in line {Line}");
     }
