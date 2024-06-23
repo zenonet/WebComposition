@@ -20,24 +20,26 @@
             gap: 10pt;
         }
     </style>
+    <template id="sourceCode">
+        {{srcGoesHere}}
+    </template>
     <script type="module">
 
         // Importing compiled ES module.
-        import bootsharp, {Program} from "../Runtime/bin/bootsharp/index.mjs";
+        import bootsharp, {Program} from "./bootsharp/index.mjs";
 
         // Binding 'Program.GetFrontendName' import invoked in C
         Program.getFrontendName = () => "Browser";
-        Program.applyRecomposition = (html) => document.getElementById("root-container").innerHTML = html;
-
         // Subscribing to 'Program.OnMainInvoked'
-        Program.onMainInvoked.subscribe(console.log);
 
+        Program.applyRecomposition = (html) => document.getElementById("root-container").innerHTML = html;
+        
+        
         // Initializing dotnet runtime and invoking entry point.
         await bootsharp.boot();
 
-        // Invoking 'Program.GetBackendName' C
-        console.log(`Hello ${Program.getBackendName()}!`);
-
+        Program.setSourcecode(document.getElementById("sourceCode").innerHTML);
+        
     </script>
 </head>
 <body id="root-container">

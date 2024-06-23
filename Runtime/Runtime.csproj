@@ -10,4 +10,8 @@
         <PackageReference Include="Bootsharp" Version="*-*"/>
     </ItemGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\Generator\Generator.csproj" />
+    </ItemGroup>
+
 </Project>
