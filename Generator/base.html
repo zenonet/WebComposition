@@ -20,29 +20,36 @@
             gap: 10pt;
         }
     </style>
-    <template id="sourceCode">
-        {{srcGoesHere}}
-    </template>
+
     <script type="module">
 
         // Importing compiled ES module.
-        import bootsharp, {Program} from "./bootsharp/index.mjs";
+        import bootsharp, {Program} from "./index.js";
 
         // Binding 'Program.GetFrontendName' import invoked in C
-        Program.getFrontendName = () => "Browser";
+        Program.log = (msg) => console.log(msg);
         // Subscribing to 'Program.OnMainInvoked'
 
         Program.applyRecomposition = (html) => document.getElementById("root-container").innerHTML = html;
-        
-        
+
+
         // Initializing dotnet runtime and invoking entry point.
         await bootsharp.boot();
 
-        Program.setSourcecode(document.getElementById("sourceCode").innerHTML);
-        
+        document.run = function () {
+            Program.setSourcecode(document.getElementById("sourceCode").value);
+        }
     </script>
 </head>
 <body id="root-container">
-{{{Content}}}
+<div style="min-height: 600px; min-width: 600px">
+    {{{Content}}}
+
+</div>
+<textarea id="sourceCode">
+        {{srcGoesHere}}
+</textarea>
+<button onclick="document.run()">Run</button>
 </body>
+
 </html>
