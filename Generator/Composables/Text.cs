@@ -4,8 +4,10 @@ namespace Generator.Composables;
 
 public class Text : Composable
 {
-    public override string GenerateHtml(List<Parameter> parameters, string? contentHtml = null)
+    public override string GenerateHtml()
     {
-        return $"<span class=\"composable text\">{parameters[0].Value}</span>";
+        var txt = Parameters[0].Execute();
+        if (txt is not StringValue sv) throw new ($"The Text() composable takes a string as the parameter but received {txt.GetType().Name}");
+        return $"<span class=\"composable text\">{sv.Value}</span>";
     }
 }

@@ -2,10 +2,10 @@
 
 namespace Generator.Composables;
 
-public class Box : Composable
+public class Box : BlockComposable
 {
-    public override string GenerateHtml(List<Parameter> parameters, string? contentHtml = null)
+    public override string GenerateHtml()
     {
-        return $"<div class=\"box composable container\">{contentHtml}</div>";
+        return $"<div class=\"box composable container\">{ExecuteAndGetHtml([..Block])}</div>";
     }
 }

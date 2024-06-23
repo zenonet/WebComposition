@@ -2,10 +2,10 @@
 
 namespace Generator.Composables;
 
-public class Column : Composable
+public class Column : BlockComposable
 {
-    public override string GenerateHtml(List<Parameter> parameters, string? contentHtml = null)
+    public override string GenerateHtml()
     {
-        return $"<div class=\"column composable container\" style=\"display:flex;flex-direction:column\">{contentHtml}</div>";
+        return $"<div class=\"column composable container\" style=\"display:flex;flex-direction:column\">{ExecuteBlock()}</div>";
     }
 }

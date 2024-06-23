@@ -2,10 +2,10 @@
 
 namespace Generator.Composables;
 
-public class Button : Composable
+public class Button : BlockComposable
 {
-    public override string GenerateHtml(List<Parameter> parameters, string? contentHtml = null)
+    public override string GenerateHtml()
     {
-        return $"<button class=\"button composable\">{contentHtml}</button>";
+        return $"<button class=\"button composable\">{ExecuteBlock()}</button>";
     }
 }
