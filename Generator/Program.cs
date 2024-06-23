@@ -10,8 +10,6 @@ Console.WriteLine(html);
 WriteToOutputFile(html);
 return;
 
-
-
 void WriteToOutputFile(string html)
 {
     html = File.ReadAllText("../../../base.html").Replace("{{{Content}}}", html);

@@ -2,7 +2,7 @@
 
 namespace Generator;
 
-public abstract class Composable : Executable
+public abstract class Composable : Function
 {
     public abstract string GenerateHtml();
 
