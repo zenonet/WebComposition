@@ -1,7 +1,10 @@
-﻿using System.Text.RegularExpressions;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Text.RegularExpressions;
 using Generator;
 
-string source = File.ReadAllText("C:\\Users\\zeno\\RiderProjects\\WebComposition\\Generator\\src.wcp");
+string source = File.ReadAllText("../../src.wcp");
 
 string html = "";
 int line = 1;

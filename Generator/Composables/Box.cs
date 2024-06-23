@@ -1,4 +1,6 @@
-﻿namespace Generator.Composables;
+﻿using System.Collections.Generic;
+
+namespace Generator.Composables;
 
 public class Box : Composable
 {
