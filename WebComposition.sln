@@ -1,10 +1,12 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Generator", "Generator\Generator.csproj", "{097E1C6D-391F-4734-89C7-AB1CB2F8DA26}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Core", "Core\Core.csproj", "{097E1C6D-391F-4734-89C7-AB1CB2F8DA26}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Runtime", "Runtime\Runtime.csproj", "{2EAE7D25-C1FE-4A9E-AB6F-599E76FA418E}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BuildTool", "BuildTool\BuildTool.csproj", "{A7C6FBB4-59C6-417B-A0A0-D93877BAFAEF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CompileTimeComposer", "CompileTimeComposer\CompileTimeComposer.csproj", "{C63E2383-4E0B-41F0-9EB9-DBEF2EC6601F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -24,5 +26,9 @@ Global
 		{A7C6FBB4-59C6-417B-A0A0-D93877BAFAEF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A7C6FBB4-59C6-417B-A0A0-D93877BAFAEF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A7C6FBB4-59C6-417B-A0A0-D93877BAFAEF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C63E2383-4E0B-41F0-9EB9-DBEF2EC6601F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C63E2383-4E0B-41F0-9EB9-DBEF2EC6601F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C63E2383-4E0B-41F0-9EB9-DBEF2EC6601F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C63E2383-4E0B-41F0-9EB9-DBEF2EC6601F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

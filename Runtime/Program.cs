@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using Bootsharp;
-using Generator;
+using Core;
 public static partial class Program
 {
     public static Interpreter i = new();

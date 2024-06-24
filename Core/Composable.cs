@@ -1,6 +1,6 @@
 ﻿using System.Text;
 
-namespace Generator;
+namespace Core;
 
 public abstract class Composable : Function
 {

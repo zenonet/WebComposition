@@ -1,4 +1,4 @@
-﻿namespace Generator;
+﻿namespace Core;
 
 public class ValueCall(Value value) : Executable
 {

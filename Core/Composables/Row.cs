@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Generator.Composables;
+namespace Core.Composables;
 
 public class Row : BlockComposable
 {

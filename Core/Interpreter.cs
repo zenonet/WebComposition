@@ -1,7 +1,7 @@
 ﻿using System.Runtime.Serialization;
 using System.Text.RegularExpressions;
 
-namespace Generator;
+namespace Core;
 
 public class Interpreter
 {

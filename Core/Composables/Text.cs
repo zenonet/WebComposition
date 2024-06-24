@@ -1,5 +1,5 @@
 ﻿
-namespace Generator.Composables;
+namespace Core.Composables;
 
 public class Text : Composable
 {

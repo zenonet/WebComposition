@@ -1,6 +1,6 @@
-﻿using Generator.Composables;
+﻿using Core.Composables;
 
-namespace Generator;
+namespace Core;
 
 public abstract class Executable
 {
