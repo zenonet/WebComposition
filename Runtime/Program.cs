@@ -33,6 +33,7 @@ public static partial class Program
         }
     }
 
+    [JSInvokable]
     public static void Recompose()
     {
         string html = Composable.ExecuteAndGetHtml(ast);

@@ -7,12 +7,12 @@ public class Button : BlockComposable
     public override string GenerateHtml()
     {
         string onClick = "";
-        if (Parameters.Count > 0)
+        if (Parameters is {Count: > 0})
         {
             var onClickFunction = Parameters[0].Execute();
             if (onClickFunction is LambdaReferenceValue lrv)
             {
-                onClick = $"onclick=\"Program.callLambda({lrv.FunctionIndex})\"";
+                onClick = $"onclick=\"document.callLambda({lrv.FunctionIndex})\"";
             }
         }
 

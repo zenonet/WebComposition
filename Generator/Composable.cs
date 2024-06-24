@@ -8,8 +8,9 @@ public abstract class Composable : Function
 
     public override Value Execute()
     {
+        if (composableBlockStack.Count < 1) throw new ($"Empty block stack, can't compose {GetType().Name}");
         composableBlockStack.Peek().Append(GenerateHtml());
-        return null!;
+        return VoidValue.I;
     }
 
     private static Stack<StringBuilder> composableBlockStack = new();

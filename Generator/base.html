@@ -35,9 +35,15 @@
 
         // Initializing dotnet runtime and invoking entry point.
         await bootsharp.boot();
-
+        document.getElementById("loadingMsg").style.display = "None";
         document.run = function () {
             Program.setSourcecode(document.getElementById("sourceCode").value);
+        }
+        document.recompose = function () {
+            Program.recompose();
+        }
+        document.callLambda = function (id){
+            Program.callLambda(id);
         }
     </script>
 </head>
@@ -49,7 +55,9 @@
 <textarea id="sourceCode">
         {{srcGoesHere}}
 </textarea>
+<h2 id="loadingMsg">Loading composer...</h2>
 <button onclick="document.run()">Run</button>
+<button onclick="document.recompose()">Recompose</button>
 </body>
 
 </html>
