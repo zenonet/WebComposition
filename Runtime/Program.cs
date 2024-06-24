@@ -1,22 +1,41 @@
-﻿using System;
+﻿using System.Collections.Generic;
 using Bootsharp;
-
+using Generator;
 public static partial class Program
 {
+    public static Interpreter i = new();
+    private static List<Executable> ast;
     public static void Main ()
     {
-        OnMainInvoked($"Hello {GetFrontendName()}, .NET here!");
     }
 
-    [JSEvent] // Used in JS as Program.onMainInvoked.subscribe(..)
-    public static partial void OnMainInvoked (string message);
+    [JSInvokable]
+    public static void SetSourcecode(string source)
+    {
+        Log("Source: " + source);
+        ast = i.ParseExecutables(ref source);
+        Recompose();
+    }
 
-    [JSFunction] // Set in JS as Program.getFrontendName = () => ..
-    public static partial string GetFrontendName ();
-
-    [JSInvokable] // Invoked from JS as Program.GetBackendName()
-    public static string GetBackendName () => Environment.Version.ToString();
+    [JSFunction]
+    public static partial void Log (string msg);
     
     [JSFunction] // Set in JS as Program.applyRecomposition = () => ..
-    public static partial string ApplyRecomposition (string newBody);
+    public static partial void ApplyRecomposition (string newBody);
+
+    [JSInvokable]
+    public static void CallLambda(int id)
+    {
+        List<Executable> lambda = Lambda.FunctionDefinitions[id];
+        foreach (Executable e in lambda)
+        {
+            e.Execute();
+        }
+    }
+
+    public static void Recompose()
+    {
+        string html = Composable.ExecuteAndGetHtml(ast);
+        ApplyRecomposition(html);
+    }
 }
