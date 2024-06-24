@@ -14,6 +14,10 @@ public static partial class Program
     {
         Log("Source: " + source);
         ast = i.ParseExecutables(ref source);
+        foreach (Variable var in VariableSetter.VariableValues.Values)
+        {
+            var.VariableChanged += Recompose;
+        }
         Recompose();
     }
 
@@ -33,10 +37,14 @@ public static partial class Program
         }
     }
 
+    private static bool isComposing = false;
     [JSInvokable]
     public static void Recompose()
     {
+        if (isComposing) return;
+        isComposing = true;
         string html = Composable.ExecuteAndGetHtml(ast);
         ApplyRecomposition(html);
+        isComposing = false;
     }
 }
