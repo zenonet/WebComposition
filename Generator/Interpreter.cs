@@ -16,10 +16,11 @@ public class Interpreter
         if (match.Success)
         {
             src = src[match.Length..];
+            Executable executable = ParseExecutable(ref src);
             return new VariableSetter
             {
                 VariableName = match.Groups[1].Value,
-                Value = ParseExecutable(ref src),
+                Value = executable,
             };
         }
 
@@ -43,6 +44,7 @@ public class Interpreter
                 if (src[0] != ')') throw new($"Unclosed parentheses in line {Line}");
                 src = src[1..];
                 exe.Parameters = parameters;
+                exe.Dependencies = parameters.SelectMany(x => x.Dependencies ?? []).ToList();
 
                 block:
                 SkipWhitespace(ref src);
@@ -109,10 +111,7 @@ public class Interpreter
         if (match.Success)
         {
             src = src[match.Length..];
-            return new VariableGetter
-            {
-                VariableName = match.Groups[1].Value,
-            };
+            return new VariableGetter(match.Groups[1].Value);
         }
 
         #endregion
