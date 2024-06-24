@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Bootsharp;
 using Core;
 public static partial class Program
@@ -14,9 +15,13 @@ public static partial class Program
     {
         Log("Source: " + source);
         ast = i.ParseExecutables(ref source);
-        foreach (Variable var in VariableSetter.VariableValues.Values)
+        foreach (KeyValuePair<string, Variable> var in VariableSetter.VariableValues)
         {
-            var.VariableChanged += Recompose;
+            var.Value.VariableChanged += () =>
+            {
+                Console.WriteLine($"Recompositing because variable {var.Key} changed");
+                Recompose();
+            };
         }
         Recompose();
     }
@@ -37,7 +42,7 @@ public static partial class Program
         }
     }
 
-    private static bool isComposing = false;
+    private static bool isComposing;
     [JSInvokable]
     public static void Recompose()
     {

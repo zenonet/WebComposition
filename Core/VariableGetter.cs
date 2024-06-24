@@ -14,6 +14,7 @@ public class VariableGetter : Executable
     {
         if (!VariableSetter.VariableValues.TryGetValue(VariableName, out Variable? var))
             throw new($"Variable {VariableName} has never been declared");
+        if (var.Value == VoidValue.Uninitialized) throw new($"Variable {VariableName} hasn't been initialized yet.");
         return var.Value;
     }
 }

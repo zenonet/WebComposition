@@ -12,15 +12,19 @@ public class Interpreter
         Match match;
         #region Parse Variable Setters
 
-        match = Regex.Match(src, @"^([A-z]\w*)\s*=(?!=)\s*");
+        match = Regex.Match(src, @"^([A-z]\w*)\s*=(?!=)\s*(init)?\s*");
         if (match.Success)
         {
             src = src[match.Length..];
             Executable executable = ParseExecutable(ref src);
+
+            if (!VariableSetter.VariableValues.ContainsKey(match.Groups[1].Value)) VariableSetter.VariableValues[match.Groups[1].Value] = new();
+            VariableSetter.VariableValues[match.Groups[1].Value].Value = VoidValue.Uninitialized;
             return new VariableSetter
             {
                 VariableName = match.Groups[1].Value,
                 Value = executable,
+                IsInitOnly = match.Groups[2].Success,
             };
         }
 
