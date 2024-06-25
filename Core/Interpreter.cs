@@ -10,7 +10,7 @@ public class Interpreter
     public Executable ParseExecutable(ref string src)
     {
         var firstExecutable = ParseExecutableWithoutExpressions(ref src);
-        SkipWhitespace(ref src);
+        SkipNonStatementDelimitingWhitespace(ref src);
         // If this is not an expression
         if (src.Length == 0 || !"+-*/".Contains(src[0])) return firstExecutable;
 
@@ -21,11 +21,12 @@ public class Interpreter
 
         while ("+-*/".Contains(src[0]))
         {
-            SkipWhitespace(ref src);
+            SkipNonStatementDelimitingWhitespace(ref src);
             operators.Add(src[0]);
             src = src[1..];
             SkipWhitespace(ref src);
             operands.Add(ParseExecutableWithoutExpressions(ref src));
+            SkipWhitespace(ref src);
         }
 
         Dictionary<char, int> operatorPriorities = new()
@@ -225,6 +226,14 @@ public class Interpreter
     void SkipWhitespace(ref string src)
     {
         while (src.Length > 0 && char.IsWhiteSpace(src, 0))
+        {
+            if (src[0] == '\n') Line++;
+            src = src[1..];
+        }
+    }
+    void SkipNonStatementDelimitingWhitespace(ref string src)
+    {
+        while (src.Length > 0 && char.IsWhiteSpace(src, 0) && src[0] is not '\n' and not '\r')
         {
             if (src[0] == '\n') Line++;
             src = src[1..];
