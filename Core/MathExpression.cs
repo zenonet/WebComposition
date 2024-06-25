@@ -10,16 +10,22 @@ public class MathExpression : Executable
     {
         var left = LeftOperand.Execute();
         var right = RightOperand.Execute();
-        if (left is not IntValue l || right is not IntValue r)
-            throw new("Math expressions with values other than ints currently aren't supported");
 
-        var result = Operator switch
+        if ("+-*/".Contains(Operator))
         {
-            '+' => l.Value + r.Value,
-            '-' => l.Value - r.Value,
-            '*' => l.Value * r.Value,
-            '/' => l.Value / r.Value,
-        };
-        return new IntValue{Value = result};
+            if (left is not IntValue l || right is not IntValue r)
+                throw new("Math expressions with values other than ints currently aren't supported");
+            
+            var result = Operator switch
+            {
+                '+' => l.Value + r.Value,
+                '-' => l.Value - r.Value,
+                '*' => l.Value * r.Value,
+                '/' => l.Value / r.Value,
+            };
+            return new IntValue{Value = result};
+        }
+
+        throw new($"The {Operator} operator hasn't been implemented yet.");
     }
 }
