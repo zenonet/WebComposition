@@ -14,6 +14,9 @@ public static partial class Program
     public static void SetSourcecode(string source)
     {
         Log("Source: " + source);
+        VariableSetter.VariableValues.Clear();
+        Lambda.FunctionDefinitions.Clear();
+        i.Line = 1;
         ast = i.ParseExecutables(ref source);
         foreach (KeyValuePair<string, Variable> var in VariableSetter.VariableValues)
         {
