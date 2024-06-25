@@ -9,6 +9,29 @@ public class Interpreter
 
     public Executable ParseExecutable(ref string src)
     {
+        var firstExecutable = ParseExecutableWithoutExpressions(ref src);
+        SkipWhitespace(ref src);
+        // If this is not an expression
+        if (!"+-*/".Contains(src[0])) return firstExecutable;
+        
+        Stack<Executable> operands = new();
+        Stack<char> operators = new();
+        
+        operands.Push(firstExecutable);
+
+        while ("+-*/".Contains(src[0]))
+        {
+            SkipWhitespace(ref src);
+            operators.Push(src[0]);
+            SkipWhitespace(ref src);
+            operands.Push(ParseExecutableWithoutExpressions(ref src));
+        }
+        
+        // Now, the entire expression is contained in the two stacks
+        throw new NotImplementedException("Expressions have not been fully implemented yet");
+    }
+    public Executable ParseExecutableWithoutExpressions(ref string src)
+    {
         Match match;
 
         #region Parse Variable Setters
