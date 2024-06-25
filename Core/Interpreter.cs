@@ -153,6 +153,17 @@ public class Interpreter
 
         #endregion
 
+        #region Parse bool literals
+
+        match = Regex.Match(src, "^(true)|^false");
+        if (match.Success)
+        {
+            src = src[match.Length..];
+            return new ValueCall(new BoolValue {Value = match.Groups[1].Success});
+        }
+
+        #endregion
+        
         #region Parse string literals
 
         match = Regex.Match(src, @"^""(.*?(?<!\\))""");
