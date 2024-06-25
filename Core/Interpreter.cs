@@ -10,6 +10,7 @@ public class Interpreter
     public Executable ParseExecutable(ref string src)
     {
         Match match;
+
         #region Parse Variable Setters
 
         match = Regex.Match(src, @"^([A-z]\w*)\s*=(?!=)\s*(init)?\s*");
@@ -18,8 +19,12 @@ public class Interpreter
             src = src[match.Length..];
             Executable executable = ParseExecutable(ref src);
 
-            if (!VariableSetter.VariableValues.ContainsKey(match.Groups[1].Value)) VariableSetter.VariableValues[match.Groups[1].Value] = new();
-            VariableSetter.VariableValues[match.Groups[1].Value].Value = VoidValue.Uninitialized;
+            if (!VariableSetter.VariableValues.ContainsKey(match.Groups[1].Value))
+            {
+                VariableSetter.VariableValues[match.Groups[1].Value] = new();
+                VariableSetter.VariableValues[match.Groups[1].Value].Value = VoidValue.Uninitialized;
+            }
+
             return new VariableSetter
             {
                 VariableName = match.Groups[1].Value,
@@ -72,7 +77,7 @@ public class Interpreter
         #endregion
 
         #region Parse Lambda expressions
-        
+
         match = Regex.Match(src, @"^{\s*");
         if (match.Success)
         {
@@ -82,11 +87,12 @@ public class Interpreter
             Lambda.FunctionDefinitions.Add(executables);
             return new Lambda
             {
-                ReferenceValue = new(){ FunctionIndex = Lambda.FunctionDefinitions.Count-1},
+                ReferenceValue = new() {FunctionIndex = Lambda.FunctionDefinitions.Count - 1},
             };
         }
+
         #endregion
-        
+
         #region Parse string literals
 
         match = Regex.Match(src, @"^""(.*?(?<!\\))""");
@@ -100,7 +106,7 @@ public class Interpreter
 
         #region Parse int literals
 
-        match = Regex.Match(src, @"-?\d+");
+        match = Regex.Match(src, @"^-?\d+");
         if (match.Success)
         {
             src = src[match.Length..];
@@ -115,15 +121,17 @@ public class Interpreter
         if (match.Success)
         {
             src = src[match.Length..];
-            return new VariableGetter(match.Groups[1].Value){
+            return new VariableGetter(match.Groups[1].Value)
+            {
                 IsIncrementOperation = match.Groups[2].Success || match.Groups[3].Success,
-                IncrementDirection = match.Groups[2].Success ? (sbyte)1 : (sbyte)-1,
+                IncrementDirection = match.Groups[2].Success ? (sbyte) 1 : (sbyte) -1,
             };
         }
 
         #endregion
 
-        throw new($"Invalid syntax in line {Line}");
+        throw new
+            ($"Invalid syntax in line {Line}");
     }
 
     public List<Executable> ParseExecutables(ref string src)
