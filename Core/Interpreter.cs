@@ -155,6 +155,8 @@ public class Interpreter
                     SkipWhitespace(ref src);
                     blockComposable.Block = ParseExecutables(ref src);
                     SkipWhitespace(ref src);
+                    
+                    if (src.Length == 0) throw new($"{composableName}'s content block isn't closed!");
                     src = src[1..];
                 }
 
