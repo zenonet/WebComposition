@@ -9,14 +9,6 @@ public class Interpreter
 
     public Executable ParseExecutable(ref string src)
     {
-        Dictionary<char, int> operatorPriorities = new()
-        {
-            {'+', 1},
-            {'-', 1},
-            {'*', 2},
-            {'/', 2},
-        };
-
         var firstExecutable = ParseExecutableWithoutExpressions(ref src);
         SkipWhitespace(ref src);
         // If this is not an expression
@@ -36,6 +28,14 @@ public class Interpreter
             operands.Add(ParseExecutableWithoutExpressions(ref src));
         }
 
+        Dictionary<char, int> operatorPriorities = new()
+        {
+            {'+', 1},
+            {'-', 1},
+            {'*', 2},
+            {'/', 2},
+        };
+        
         // Now, the entire expression is contained in the two lists, we can actually start parsing 
         int currentPriority = 2; // start with the maximum priority
         while (currentPriority > 0)
