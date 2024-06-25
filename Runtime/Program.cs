@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using Bootsharp;
 using Core;
 public static partial class Program
@@ -17,7 +18,12 @@ public static partial class Program
         VariableSetter.VariableValues.Clear();
         Lambda.FunctionDefinitions.Clear();
         i.Line = 1;
+
+        Stopwatch sw = Stopwatch.StartNew();
         ast = i.ParseExecutables(ref source);
+        sw.Stop();
+        Log($"Parsing took {sw.Elapsed.TotalMilliseconds}ms");
+        
         foreach (KeyValuePair<string, Variable> var in VariableSetter.VariableValues)
         {
             var.Value.VariableChanged += () =>
@@ -49,9 +55,16 @@ public static partial class Program
     [JSInvokable]
     public static void Recompose()
     {
-        if (isComposing) return;
+        if (isComposing)
+        {
+            Log("Recomposition rejected because the composition process isn't over yet");
+            return;
+        }
         isComposing = true;
+        Stopwatch sw = Stopwatch.StartNew();
         string html = Composable.ExecuteAndGetHtml(ast);
+        sw.Stop();
+        Log($"Recomposition took {sw.Elapsed.TotalMilliseconds}ms");
         ApplyRecomposition(html);
         isComposing = false;
     }
