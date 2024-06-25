@@ -111,7 +111,7 @@ public class Interpreter
 
         #region Parse Variable Getters
 
-        match = Regex.Match(src, @"^([A-z]\w*)(?:(\+\+)|(--))");
+        match = Regex.Match(src, @"^([A-z]\w*)(?:(\+\+)|(--))?");
         if (match.Success)
         {
             src = src[match.Length..];
