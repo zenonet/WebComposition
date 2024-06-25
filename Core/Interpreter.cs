@@ -94,6 +94,36 @@ public class Interpreter
         }
 
         #endregion
+        
+        #region Parse if statements
+
+        match = Regex.Match(src, @"^if\s?\(");
+        if (match.Success)
+        {
+            src = src[match.Length..];
+            Executable condition = ParseExecutable(ref src);
+            if (src[0] != ')') throw new("Parentheses around if statement condition aren't closed");
+            src = src[1..];
+            SkipWhitespace(ref src);
+            
+            if (src[0] != '{') throw new("Conditional block of if statement missing");
+            src = src[1..];
+
+            List<Executable> block = ParseExecutables(ref src);
+
+            SkipWhitespace(ref src);
+
+            if (src[0] != '}') throw new("Curly brackets around if statement conditional block aren't closed");
+            src = src[1..];
+            
+            return new IfStatement
+            {
+                Condition = condition,
+                Block = block,
+            };
+        }
+
+        #endregion
 
         #region Parse function calls
 
