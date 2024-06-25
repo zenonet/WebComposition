@@ -111,11 +111,14 @@ public class Interpreter
 
         #region Parse Variable Getters
 
-        match = Regex.Match(src, @"^([A-z]\w*)");
+        match = Regex.Match(src, @"^([A-z]\w*)(?:(\+\+)|(--))");
         if (match.Success)
         {
             src = src[match.Length..];
-            return new VariableGetter(match.Groups[1].Value);
+            return new VariableGetter(match.Groups[1].Value){
+                IsIncrementOperation = match.Groups[2].Success || match.Groups[3].Success,
+                IncrementDirection = match.Groups[2].Success ? (sbyte)1 : (sbyte)-1,
+            };
         }
 
         #endregion
