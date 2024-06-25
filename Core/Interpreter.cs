@@ -9,27 +9,63 @@ public class Interpreter
 
     public Executable ParseExecutable(ref string src)
     {
+        Dictionary<char, int> operatorPriorities = new()
+        {
+            {'+', 1},
+            {'-', 1},
+            {'*', 2},
+            {'/', 2},
+        };
+
         var firstExecutable = ParseExecutableWithoutExpressions(ref src);
         SkipWhitespace(ref src);
         // If this is not an expression
-        if (!"+-*/".Contains(src[0])) return firstExecutable;
-        
-        Stack<Executable> operands = new();
-        Stack<char> operators = new();
-        
-        operands.Push(firstExecutable);
+        if (src.Length == 0 || !"+-*/".Contains(src[0])) return firstExecutable;
+
+        List<Executable> operands = new();
+        List<char> operators = new();
+
+        operands.Add(firstExecutable);
 
         while ("+-*/".Contains(src[0]))
         {
             SkipWhitespace(ref src);
-            operators.Push(src[0]);
+            operators.Add(src[0]);
+            src = src[1..];
             SkipWhitespace(ref src);
-            operands.Push(ParseExecutableWithoutExpressions(ref src));
+            operands.Add(ParseExecutableWithoutExpressions(ref src));
         }
-        
-        // Now, the entire expression is contained in the two stacks
-        throw new NotImplementedException("Expressions have not been fully implemented yet");
+
+        // Now, the entire expression is contained in the two lists, we can actually start parsing 
+        int currentPriority = 2; // start with the maximum priority
+        while (currentPriority > 0)
+        {
+            for (int i = 0; i < operators.Count; i++)
+            {
+                int priority = operatorPriorities[operators[i]];
+                if (currentPriority == priority)
+                {
+                    // The current operation (with operator i) can safely be merged
+                    var mergedExpression = new MathExpression
+                    {
+                        LeftOperand = operands[i],
+                        RightOperand = operands[i + 1],
+                        Operator = operators[i],
+                    };
+                    operands[i] = mergedExpression;
+                    operands.RemoveAt(i+1);
+                    operators.RemoveAt(i);
+                    i--;
+                }
+            }
+            currentPriority--;
+        }
+
+        if (operands.Count > 1) throw new("There are more than one operand left from expression parsing. Something must've gone wrong. I am sorry.");
+
+        return operands[0];
     }
+
     public Executable ParseExecutableWithoutExpressions(ref string src)
     {
         Match match;
