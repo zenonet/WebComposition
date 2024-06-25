@@ -1,0 +1,6 @@
+v = init "Pls click me"
+Column{
+  Button({v = "Thank you"}){
+    Text(v)
+  }
+}
