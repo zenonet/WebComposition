@@ -43,9 +43,10 @@ public class Interpreter
     {
         var firstExecutable = ParseExecutableWithoutExpressions(ref src);
         SkipNonStatementDelimitingWhitespace(ref src);
+        if (src.Length == 0) return firstExecutable;
         // If this is not an expression
         OperatorType o = GetNextOperator(ref src);
-        if (src.Length == 0 || o == OperatorType.None) return firstExecutable;
+        if (o == OperatorType.None) return firstExecutable;
 
         List<Executable> operands = new();
         List<OperatorType> operators = new();
@@ -152,20 +153,40 @@ public class Interpreter
             src = src[1..];
             SkipWhitespace(ref src);
 
+            
+            
             if (src[0] != '{') throw new("Conditional block of if statement missing");
             src = src[1..];
 
             List<Executable> block = ParseExecutables(ref src);
+            List<Executable>? elseBlock = null;
 
             SkipWhitespace(ref src);
 
             if (src[0] != '}') throw new("Curly brackets around if statement conditional block aren't closed");
             src = src[1..];
+            
+            SkipWhitespace(ref src);
+
+            if (src.StartsWith("else"))
+            {
+                src = src[4..];
+                if (src[0] != '{') throw new("Else block of if statement missing");
+                src = src[1..];
+                
+                elseBlock = ParseExecutables(ref src);
+
+                SkipWhitespace(ref src);
+
+                if (src[0] != '}') throw new("Curly brackets around if statement's else block aren't closed");
+                src = src[1..];
+            }
 
             return new IfStatement
             {
                 Condition = condition,
                 Block = block,
+                ElseBlock = elseBlock,
             };
         }
 
