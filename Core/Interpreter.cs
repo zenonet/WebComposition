@@ -44,6 +44,9 @@ public class Interpreter
         var firstExecutable = ParseExecutableWithoutExpressions(ref src);
         SkipNonStatementDelimitingWhitespace(ref src);
         if (src.Length == 0) return firstExecutable;
+
+        SkipWhitespace(ref src);
+        
         // If this is not an expression
         OperatorType o = GetNextOperator(ref src);
         if (o == OperatorType.None) return firstExecutable;
@@ -115,6 +118,27 @@ public class Interpreter
     }
 
     public Executable ParseExecutableWithoutExpressions(ref string src)
+    {
+        Executable exe = ParseExecutableWithoutExtensions(ref src);
+        if (src[0] == '?')
+        {
+            // Ternary conditional operator
+            SkipWhitespace(ref src);
+            Executable positive = ParseExecutable(ref src);
+            SkipWhitespace(ref src);
+            if (src[0] != ':') throw new("Ternary conditional operator without negative value (: is missing)");
+            Executable negative = ParseExecutable(ref src);
+            return new TernaryConditionalOperator
+            {
+                Condition = exe,
+                PositiveValue = positive,
+                NegativeValue = negative,
+            };
+        }
+
+        return exe;
+    }
+    public Executable ParseExecutableWithoutExtensions(ref string src)
     {
         Match match;
 
