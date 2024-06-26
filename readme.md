@@ -13,6 +13,10 @@ renderer and not HTML)
 Also, since WebComposition is a language and a UI Framework at the same time, it's very easy to automatically recompose UI when state changes because the
 Composer has direct access to variables and can detect changes without using any wrapper classes for state.
 
+## The WebComposition Programming Language
+
+The language is developed in this repo as well and its only reason to exist is the UI Framework. It currently is dynamically typed (even though I might change that at some point) and lacks some important features for a programming language (because it's under construction).
+
 ## How does it work?
 
 While a program runs, executed Composables can generate HTML code that that accends along the syntax tree allowing parent nodes to wrap it.
@@ -30,3 +34,4 @@ Currently the following language features are implemented:
     - Column
     - Button (with onclick event)
     - Text
+- Expression Parsing (mathematical expression support as you would expect it for a programming language)
