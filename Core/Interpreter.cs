@@ -120,13 +120,17 @@ public class Interpreter
     public Executable ParseExecutableWithoutExpressions(ref string src)
     {
         Executable exe = ParseExecutableWithoutExtensions(ref src);
-        if (src[0] == '?')
+        SkipWhitespace(ref src);
+        if (src.Length > 0 && src[0] == '?')
         {
-            // Ternary conditional operator
+            src = src[1..];
             SkipWhitespace(ref src);
+            // Ternary conditional operator
             Executable positive = ParseExecutable(ref src);
             SkipWhitespace(ref src);
             if (src[0] != ':') throw new("Ternary conditional operator without negative value (: is missing)");
+            src = src[1..];
+            SkipWhitespace(ref src);
             Executable negative = ParseExecutable(ref src);
             return new TernaryConditionalOperator
             {
