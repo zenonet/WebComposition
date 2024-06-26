@@ -7,38 +7,83 @@ public class Interpreter
 {
     public int Line = 1;
 
+    private OperatorType GetNextOperator(ref string src)
+    {
+        if (src.StartsWith(">=") || src.StartsWith("<=") || src.StartsWith("=="))
+        {
+            string op = src[..2];
+            src = src[2..];
+            return op switch
+            {
+                ">=" => OperatorType.GreaterThanOrEqualTo,
+                "<=" => OperatorType.LessThanOrEqualTo,
+                "==" => OperatorType.Equals,
+            };
+        }
+
+        if ("+-*/<>".Contains(src[0]))
+        {
+            char op = src[0];
+            src = src[1..];
+            return op switch
+            {
+                '>' => OperatorType.GreaterThan,
+                '<' => OperatorType.LessThan,
+                '+' => OperatorType.Plus,
+                '-' => OperatorType.Minus,
+                '*' => OperatorType.Multiply,
+                '/' => OperatorType.Divide,
+            };
+        }
+
+        return OperatorType.None;
+    }
+
     public Executable ParseExecutable(ref string src)
     {
         var firstExecutable = ParseExecutableWithoutExpressions(ref src);
         SkipNonStatementDelimitingWhitespace(ref src);
         // If this is not an expression
-        if (src.Length == 0 || !"+-*/".Contains(src[0])) return firstExecutable;
+        OperatorType o = GetNextOperator(ref src);
+        if (src.Length == 0 || o == OperatorType.None) return firstExecutable;
 
         List<Executable> operands = new();
-        List<char> operators = new();
+        List<OperatorType> operators = new();
 
         operands.Add(firstExecutable);
+        operators.Add(o);
 
-        while ("+-*/".Contains(src[0]))
+
+        while (true)
         {
-            SkipNonStatementDelimitingWhitespace(ref src);
-            operators.Add(src[0]);
-            src = src[1..];
             SkipWhitespace(ref src);
             operands.Add(ParseExecutableWithoutExpressions(ref src));
             SkipWhitespace(ref src);
+
+            SkipNonStatementDelimitingWhitespace(ref src);
+
+            OperatorType? op = GetNextOperator(ref src);
+            if (op == OperatorType.None) break;
+
+            operators.Add(op.Value);
         }
 
-        Dictionary<char, int> operatorPriorities = new()
+        Dictionary<OperatorType, int> operatorPriorities = new()
         {
-            {'+', 1},
-            {'-', 1},
-            {'*', 2},
-            {'/', 2},
+            {OperatorType.Plus, 2},
+            {OperatorType.Minus, 2},
+            {OperatorType.Multiply, 3},
+            {OperatorType.Divide, 3},
+
+            {OperatorType.Equals, 1},
+            {OperatorType.GreaterThan, 1},
+            {OperatorType.GreaterThanOrEqualTo, 1},
+            {OperatorType.LessThan, 1},
+            {OperatorType.LessThanOrEqualTo, 1},
         };
-        
+
         // Now, the entire expression is contained in the two lists, we can actually start parsing 
-        int currentPriority = 2; // start with the maximum priority
+        int currentPriority = 3; // start with the maximum priority
         while (currentPriority > 0)
         {
             for (int i = 0; i < operators.Count; i++)
@@ -47,18 +92,19 @@ public class Interpreter
                 if (currentPriority == priority)
                 {
                     // The current operation (with operator i) can safely be merged
-                    var mergedExpression = new MathExpression
+                    var mergedExpression = new Expression
                     {
                         LeftOperand = operands[i],
                         RightOperand = operands[i + 1],
                         Operator = operators[i],
                     };
                     operands[i] = mergedExpression;
-                    operands.RemoveAt(i+1);
+                    operands.RemoveAt(i + 1);
                     operators.RemoveAt(i);
                     i--;
                 }
             }
+
             currentPriority--;
         }
 
@@ -94,7 +140,7 @@ public class Interpreter
         }
 
         #endregion
-        
+
         #region Parse if statements
 
         match = Regex.Match(src, @"^if\s?\(");
@@ -105,7 +151,7 @@ public class Interpreter
             if (src[0] != ')') throw new("Parentheses around if statement condition aren't closed");
             src = src[1..];
             SkipWhitespace(ref src);
-            
+
             if (src[0] != '{') throw new("Conditional block of if statement missing");
             src = src[1..];
 
@@ -115,7 +161,7 @@ public class Interpreter
 
             if (src[0] != '}') throw new("Curly brackets around if statement conditional block aren't closed");
             src = src[1..];
-            
+
             return new IfStatement
             {
                 Condition = condition,
@@ -155,7 +201,7 @@ public class Interpreter
                     SkipWhitespace(ref src);
                     blockComposable.Block = ParseExecutables(ref src);
                     SkipWhitespace(ref src);
-                    
+
                     if (src.Length == 0) throw new($"{composableName}'s content block isn't closed!");
                     src = src[1..];
                 }
@@ -195,7 +241,7 @@ public class Interpreter
         }
 
         #endregion
-        
+
         #region Parse string literals
 
         match = Regex.Match(src, @"^""(.*?(?<!\\))""");
@@ -274,6 +320,7 @@ public class Interpreter
             src = src[1..];
         }
     }
+
     void SkipNonStatementDelimitingWhitespace(ref string src)
     {
         while (src.Length > 0 && char.IsWhiteSpace(src, 0) && src[0] is not '\n' and not '\r')
