@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Diagnostics;
 using Bootsharp;
 using Core;
@@ -20,17 +19,13 @@ public static partial class Program
         i.Line = 1;
 
         Stopwatch sw = Stopwatch.StartNew();
-        ast = i.ParseExecutables(ref source);
+        ast = i.ParseExecutables(source);
         sw.Stop();
         Log($"Parsing took {sw.Elapsed.TotalMilliseconds}ms");
         
         foreach (KeyValuePair<string, Variable> var in VariableSetter.VariableValues)
         {
-            var.Value.VariableChanged += () =>
-            {
-                Console.WriteLine($"Recompositing because variable {var.Key} changed");
-                Recompose();
-            };
+            var.Value.VariableChanged += Recompose;
         }
         Recompose();
     }
@@ -57,7 +52,7 @@ public static partial class Program
     {
         if (isComposing)
         {
-            Log("Recomposition rejected because the composition process isn't over yet");
+            // Log("Recomposition rejected because the composition process isn't over yet");
             return;
         }
         isComposing = true;

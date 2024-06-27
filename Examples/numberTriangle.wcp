@@ -1,0 +1,13 @@
+﻿m = init 1
+Column{
+    Button({m++}){Text(m)}
+    for(i=0; i<m;i++){
+        j = i
+        Row{
+            while(j > 0){
+                Text(j--)
+      
+            }
+        }
+    }
+}

@@ -7,7 +7,7 @@ string src = File.ReadAllText("../../../../Core/src.wcp");
 
 
 Stopwatch sw = Stopwatch.StartNew();
-var exes = i.ParseExecutables(ref src);
+var exes = i.ParseExecutables(src);
 sw.Stop();
 Console.WriteLine($"Parsing took {sw.Elapsed.TotalMilliseconds}ms");
 

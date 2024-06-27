@@ -1,0 +1,78 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>AppTitle</title>
+    <style>
+        .button {
+            background: white;
+            border-radius: 3pt;
+            border-width: 1.2pt;
+            padding: 3pt;
+        }
+
+        .composable {
+            margin: 2pt;
+            font-family: "Segoe UI", sans-serif;
+        }
+
+        .container {
+            gap: 10pt;
+            align-items: flex-start
+        }
+
+        .loading-screen{
+            font-family: "Segoe UI",sans-serif;
+            display: flex;
+            flex-direction: column;
+
+            h1{
+                margin: 38.2vh auto auto;
+            }
+            p{
+                margin: 15px auto;
+            }
+        }
+        
+    </style>
+    <script type="module">
+
+        import bootsharp, {Program} from "./index.js";
+        Program.log = (msg) => console.log(msg);
+        Program.applyRecomposition = (html) => document.getElementById("root-container").innerHTML = html;
+        document.getElementById('sourceCode').addEventListener('keydown', function (e) {
+            if (e.key === 'Tab') {
+                e.preventDefault();
+                var start = this.selectionStart;
+                var end = this.selectionEnd;
+
+                // set textarea value to: text before caret + tab + text after caret
+                this.value = this.value.substring(0, start) +
+                    "\t" + this.value.substring(end);
+
+                // put caret at right position again
+                this.selectionStart =
+                    this.selectionEnd = start + 1;
+            }
+        });
+
+        // Initializing dotnet runtime and invoking entry point.
+        await bootsharp.boot();
+
+        Program.setSourcecode(document.getElementById("sourceCode").value);
+
+        document.callLambda = function (id) {
+            Program.callLambda(id);
+        }
+    </script>
+    <textarea id="sourceCode" style="display: none">
+        {{srcGoesHere}}
+</textarea>
+</head>
+<body id="root-container">
+<div class="loading-screen">
+    <h1>Loading WebComposition Runtime...</h1>
+    <p>This might take a few seconds for the first time</p>
+</div>
+</body>
+</html>

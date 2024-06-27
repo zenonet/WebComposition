@@ -1,4 +1,5 @@
-﻿using System.Runtime.Serialization;
+﻿using System.Buffers;
+using System.Runtime.Serialization;
 using System.Text.RegularExpressions;
 
 namespace Core;
@@ -7,11 +8,11 @@ public class Interpreter
 {
     public int Line = 1;
 
-    private OperatorType GetNextOperator(ref string src)
+    private OperatorType GetNextOperator(ref ReadOnlySpan<char> src)
     {
         if (src.StartsWith(">=") || src.StartsWith("<=") || src.StartsWith("=="))
         {
-            string op = src[..2];
+            ReadOnlySpan<char> op = src[..2];
             src = src[2..];
             return op switch
             {
@@ -39,7 +40,7 @@ public class Interpreter
         return OperatorType.None;
     }
 
-    public Executable ParseExecutable(ref string src)
+    public Executable ParseExecutable(ref ReadOnlySpan<char> src)
     {
         var firstExecutable = ParseExecutableWithoutExpressions(ref src);
         SkipNonStatementDelimitingWhitespace(ref src);
@@ -117,7 +118,7 @@ public class Interpreter
         return operands[0];
     }
 
-    public Executable ParseExecutableWithoutExpressions(ref string src)
+    public Executable ParseExecutableWithoutExpressions(ref ReadOnlySpan<char> src)
     {
         Executable exe = ParseExecutableWithoutExtensions(ref src);
         SkipWhitespace(ref src);
@@ -143,14 +144,15 @@ public class Interpreter
         return exe;
     }
 
-    public Executable ParseExecutableWithoutExtensions(ref string src)
+    public Executable ParseExecutableWithoutExtensions(ref ReadOnlySpan<char> src)
     {
         Match match;
         SkipWhitespace(ref src);
 
         #region Parse Variable Setters
 
-        match = Regex.Match(src, @"^([A-z]\w*)\s*=(?!=)\s*(init)?\s*");
+        string srcAsString = src.ToString();
+        match = Regex.Match(srcAsString, @"^([A-z]\w*)\s*=(?!=)\s*(init)?\s*");
         if (match.Success)
         {
             src = src[match.Length..];
@@ -174,7 +176,7 @@ public class Interpreter
 
         #region Parse if statements
 
-        match = Regex.Match(src, @"^(if|while|for)\s?\(");
+        match = Regex.Match(srcAsString, @"^(if|while|for)\s?\(");
         if (match.Success)
         {
             src = src[match.Length..];
@@ -245,7 +247,7 @@ public class Interpreter
 
         #region Parse function calls
 
-        match = Regex.Match(src, @"^[^\S\r\n]*([A-z]\w*) ?[({]");
+        match = Regex.Match(srcAsString, @"^[^\S\r\n]*([A-z]\w*) ?[({]");
         if (match.Success)
         {
             string composableName = match.Groups[1].Value;
@@ -288,7 +290,7 @@ public class Interpreter
 
         #region Parse Lambda expressions
 
-        match = Regex.Match(src, @"^{\s*");
+        match = Regex.Match(srcAsString, @"^{\s*");
         if (match.Success)
         {
             src = src[match.Length..];
@@ -307,7 +309,7 @@ public class Interpreter
 
         #region Parse bool literals
 
-        match = Regex.Match(src, "^(true)|^false");
+        match = Regex.Match(srcAsString, "^(true)|^false");
         if (match.Success)
         {
             src = src[match.Length..];
@@ -318,7 +320,7 @@ public class Interpreter
 
         #region Parse string literals
 
-        match = Regex.Match(src, @"^""(.*?(?<!\\))""");
+        match = Regex.Match(srcAsString, @"^""(.*?(?<!\\))""");
         if (match.Success)
         {
             src = src[match.Length..];
@@ -329,7 +331,7 @@ public class Interpreter
 
         #region Parse int literals
 
-        match = Regex.Match(src, @"^-?\d+");
+        match = Regex.Match(srcAsString, @"^-?\d+");
         if (match.Success)
         {
             src = src[match.Length..];
@@ -340,7 +342,7 @@ public class Interpreter
 
         #region Parse Variable Getters
 
-        match = Regex.Match(src, @"^([A-z]\w*)(?:(\+\+)|(--))?");
+        match = Regex.Match(srcAsString, @"^([A-z]\w*)(?:(\+\+)|(--))?");
         if (match.Success)
         {
             src = src[match.Length..];
@@ -357,7 +359,12 @@ public class Interpreter
             ($"Invalid syntax in line {Line}");
     }
 
-    public List<Executable> ParseExecutables(ref string src)
+    public List<Executable> ParseExecutables(string src)
+    {
+        ReadOnlySpan<char> charSpan = src.AsSpan();
+        return ParseExecutables(ref charSpan);
+    }
+    public List<Executable> ParseExecutables(ref ReadOnlySpan<char> src)
     {
         List<Executable> exes = new();
         SkipWhitespace(ref src);
@@ -370,7 +377,7 @@ public class Interpreter
         return exes;
     }
 
-    public List<Executable> ParseParameters(ref string src)
+    public List<Executable> ParseParameters(ref ReadOnlySpan<char> src)
     {
         List<Executable> parameters = new();
         while (src[0] != ')')
@@ -386,25 +393,25 @@ public class Interpreter
         return parameters;
     }
 
-    void SkipWhitespace(ref string src)
+    void SkipWhitespace(ref ReadOnlySpan<char> src)
     {
-        while (src.Length > 0 && char.IsWhiteSpace(src, 0))
+        while (src.Length > 0 && char.IsWhiteSpace(src[0]))
         {
             if (src[0] == '\n') Line++;
             src = src[1..];
         }
     }
 
-    void SkipNonStatementDelimitingWhitespace(ref string src)
+    void SkipNonStatementDelimitingWhitespace(ref ReadOnlySpan<char> src)
     {
-        while (src.Length > 0 && char.IsWhiteSpace(src, 0) && src[0] is not '\n' and not '\r')
+        while (src.Length > 0 && char.IsWhiteSpace(src[0]) && src[0] is not '\n' and not '\r')
         {
             if (src[0] == '\n') Line++;
             src = src[1..];
         }
     }
 
-    List<Executable> ParseBlock(ref string src, string statementName)
+    List<Executable> ParseBlock(ref ReadOnlySpan<char> src, string statementName)
     {
         if (src[0] != '{') throw new($"Conditional block of {statementName} statement missing");
         src = src[1..];
