@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using Bootsharp;
 using Core;
@@ -18,10 +19,18 @@ public static partial class Program
         Lambda.FunctionDefinitions.Clear();
         i.Line = 1;
 
-        Stopwatch sw = Stopwatch.StartNew();
-        ast = i.ParseExecutables(source);
-        sw.Stop();
-        Log($"Parsing took {sw.Elapsed.TotalMilliseconds}ms");
+        try
+        {
+            Stopwatch sw = Stopwatch.StartNew();
+            ast = i.ParseExecutables(source);
+            sw.Stop();
+            Log($"Parsing took {sw.Elapsed.TotalMilliseconds}ms");
+        }
+        catch (Exception e)
+        {
+            ShowError(e.Message);
+        }
+
         
         foreach (KeyValuePair<string, Variable> var in VariableSetter.VariableValues)
         {
@@ -34,7 +43,10 @@ public static partial class Program
     public static partial void Log (string msg);
     
     [JSFunction] // Set in JS as Program.applyRecomposition = () => ..
-    public static partial void ApplyRecomposition (string newBody);
+    public static partial void ApplyRecomposition (string newBody); 
+    
+    [JSFunction]
+    public static partial void ShowError (string message);
 
     [JSInvokable]
     public static void CallLambda(int id)
@@ -56,11 +68,19 @@ public static partial class Program
             return;
         }
         isComposing = true;
-        Stopwatch sw = Stopwatch.StartNew();
-        string html = Composable.ExecuteAndGetHtml(ast);
-        sw.Stop();
-        Log($"Recomposition took {sw.Elapsed.TotalMilliseconds}ms");
-        ApplyRecomposition(html);
+        try
+        {
+            Stopwatch sw = Stopwatch.StartNew();
+            string html = Composable.ExecuteAndGetHtml(ast);
+            sw.Stop();
+            Log($"Recomposition took {sw.Elapsed.TotalMilliseconds}ms");
+            ApplyRecomposition(html);
+        }
+        catch (Exception e)
+        {
+            ShowError(e.Message);
+        }
+
         isComposing = false;
     }
 }

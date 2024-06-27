@@ -38,6 +38,8 @@ Column{
 }
 ```
 
+I hope you have a little fun playing around with this :)
+
 ## What makes WebComposition unique?
 
 WebComposition is heavily inspired by Jetpack Compose for Android however in constrast to Jetpack Compose, WebComposition runs in the Web and
@@ -58,14 +60,16 @@ While a program runs, executed Composables can generate HTML code that that acce
 ## What is currently supported
 
 This framework and under heavy development and might significantly change in the future.
-Currently the following language features are implemented:
+Currently, the following language features are implemented:
 
 - Variables (automatically trigger recompositions on change)
 - if statements
+- for and while loops
 - Value system (currently, there are ints, bools and strings)
 - Composables
     - Row
     - Column
     - Button (with onclick event)
     - Text
-- Expression Parsing (mathematical expression support as you would expect it for a programming language)
+- Expression Parsing (mathematical and comparison expression support as you would expect it for a programming language)
+- Single line comments (//)
