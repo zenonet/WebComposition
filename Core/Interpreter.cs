@@ -146,6 +146,7 @@ public class Interpreter
     public Executable ParseExecutableWithoutExtensions(ref string src)
     {
         Match match;
+        SkipWhitespace(ref src);
 
         #region Parse Variable Setters
 
@@ -173,49 +174,71 @@ public class Interpreter
 
         #region Parse if statements
 
-        match = Regex.Match(src, @"^if\s?\(");
+        match = Regex.Match(src, @"^(if|while|for)\s?\(");
         if (match.Success)
         {
             src = src[match.Length..];
-            Executable condition = ParseExecutable(ref src);
-            if (src[0] != ')') throw new("Parentheses around if statement condition aren't closed");
-            src = src[1..];
-            SkipWhitespace(ref src);
 
-
-            if (src[0] != '{') throw new("Conditional block of if statement missing");
-            src = src[1..];
-
-            List<Executable> block = ParseExecutables(ref src);
-            List<Executable>? elseBlock = null;
-
-            SkipWhitespace(ref src);
-
-            if (src[0] != '}') throw new("Curly brackets around if statement conditional block aren't closed");
-            src = src[1..];
-
-            SkipWhitespace(ref src);
-
-            if (src.StartsWith("else"))
+            if (match.Groups[1].Value == "for")
             {
-                src = src[4..];
-                if (src[0] != '{') throw new("Else block of if statement missing");
+                // Parse for loop
+                Executable initExe = ParseExecutable(ref src);
+                SkipWhitespace(ref src);
+                if (src[0] != ';') throw new("Invalid syntax at init statement in for loop");
                 src = src[1..];
 
-                elseBlock = ParseExecutables(ref src);
+                Executable condition = ParseExecutable(ref src);
+                SkipWhitespace(ref src);
+                if (src[0] != ';') throw new("Invalid syntax at condition statement in for loop");
+                src = src[1..];
+                Executable incrementStatement = ParseExecutable(ref src); // TODO: Allow all parts of for loop to be empty
+                SkipWhitespace(ref src);
+                if (src[0] != ')') throw new("Invalid syntax at increment statement in for loop");
+                src = src[1..];
+
+                List<Executable> block = ParseBlock(ref src, "for loop");
+
+                return new Loop
+                {
+                    InitStatement = initExe,
+                    Condition = condition,
+                    IncrementStatement = incrementStatement,
+                    Block = block,
+                };
+            }
+
+            if (match.Groups[1].Value is "if" or "while")
+            {
+                Executable condition = ParseExecutable(ref src);
+                if (src[0] != ')') throw new("Parentheses around if statement condition aren't closed");
+                src = src[1..];
+                SkipWhitespace(ref src);
+
+
+                List<Executable>? elseBlock = null;
+                List<Executable> block = ParseBlock(ref src, "if");
 
                 SkipWhitespace(ref src);
 
-                if (src[0] != '}') throw new("Curly brackets around if statement's else block aren't closed");
-                src = src[1..];
-            }
+                if (match.Groups[1].Value == "if" && src.StartsWith("else"))
+                {
+                    src = src[4..];
+                    elseBlock = ParseBlock(ref src, "else");
+                }
 
-            return new IfStatement
-            {
-                Condition = condition,
-                Block = block,
-                ElseBlock = elseBlock,
-            };
+                return match.Groups[1].Value == "if"
+                    ? new IfStatement
+                    {
+                        Condition = condition,
+                        Block = block,
+                        ElseBlock = elseBlock,
+                    }
+                    : new Loop
+                    {
+                        Condition = condition,
+                        Block = block,
+                    };
+            }
         }
 
         #endregion
@@ -379,5 +402,19 @@ public class Interpreter
             if (src[0] == '\n') Line++;
             src = src[1..];
         }
+    }
+
+    List<Executable> ParseBlock(ref string src, string statementName)
+    {
+        if (src[0] != '{') throw new($"Conditional block of {statementName} statement missing");
+        src = src[1..];
+
+        List<Executable> block = ParseExecutables(ref src);
+
+        SkipWhitespace(ref src);
+
+        if (src[0] != '}') throw new($"Curly brackets around {statementName} statement conditional block aren't closed");
+        src = src[1..];
+        return block;
     }
 }
