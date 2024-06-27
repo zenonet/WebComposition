@@ -46,7 +46,7 @@ public class Interpreter
         if (src.Length == 0) return firstExecutable;
 
         SkipWhitespace(ref src);
-        
+
         // If this is not an expression
         OperatorType o = GetNextOperator(ref src);
         if (o == OperatorType.None) return firstExecutable;
@@ -142,6 +142,7 @@ public class Interpreter
 
         return exe;
     }
+
     public Executable ParseExecutableWithoutExtensions(ref string src)
     {
         Match match;
@@ -181,8 +182,7 @@ public class Interpreter
             src = src[1..];
             SkipWhitespace(ref src);
 
-            
-            
+
             if (src[0] != '{') throw new("Conditional block of if statement missing");
             src = src[1..];
 
@@ -193,7 +193,7 @@ public class Interpreter
 
             if (src[0] != '}') throw new("Curly brackets around if statement conditional block aren't closed");
             src = src[1..];
-            
+
             SkipWhitespace(ref src);
 
             if (src.StartsWith("else"))
@@ -201,7 +201,7 @@ public class Interpreter
                 src = src[4..];
                 if (src[0] != '{') throw new("Else block of if statement missing");
                 src = src[1..];
-                
+
                 elseBlock = ParseExecutables(ref src);
 
                 SkipWhitespace(ref src);
@@ -270,7 +270,9 @@ public class Interpreter
         {
             src = src[match.Length..];
             var executables = ParseExecutables(ref src);
-            src = src[match.Length..];
+            SkipWhitespace(ref src);
+            if (src[0] != '}') throw new("Lambda block isn't closed!");
+            src = src[1..];
             Lambda.FunctionDefinitions.Add(executables);
             return new Lambda
             {
