@@ -20,6 +20,65 @@
             gap: 10pt;
             align-items: flex-start
         }
+
+
+        .loading-screen {
+            display: flex;
+            flex-direction: column;
+            position: absolute;
+            z-index: 1000;
+            background: white;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            color: black;
+
+            /* Don't allow copying the loading text*/
+            -webkit-user-select: none; /* Safari */
+            -ms-user-select: none; /* IE 10 and IE 11 */
+            user-select: none; /* Standard syntax */
+
+            h1 {
+                margin: 38.2vh auto 0;
+            }
+
+            p {
+                margin: 15px auto;
+            }
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .loading-screen {
+                background: black;
+                color: white;
+            }
+        }
+
+        #body {
+            display: flex;
+            flex-direction: column;
+            font-family: "Segoe UI", sans-serif;
+        }
+
+        .block {
+            margin: 15px;
+        }
+
+        label {
+            margin: 15px 15px 0;
+        }
+        button{
+            background: lightgray;
+            border-style: none;
+            padding: 10px;
+            border-radius: 2px;
+        }
+        button:active{
+            padding: 8px;
+            margin: 2px;
+        }
+
     </style>
 
     <script type="module">
@@ -33,7 +92,7 @@
 
         Program.applyRecomposition = (html) => document.getElementById("root-container").innerHTML = html;
 
-        document.getElementById('sourceCode').addEventListener('keydown', function(e) {
+        document.getElementById('sourceCode').addEventListener('keydown', function (e) {
             if (e.key === 'Tab') {
                 e.preventDefault();
                 var start = this.selectionStart;
@@ -51,30 +110,39 @@
 
         // Initializing dotnet runtime and invoking entry point.
         await bootsharp.boot();
-        document.getElementById("loadingMsg").style.display = "None";
+        document.getElementById("body").style.overflow = "";
+        document.getElementById("loadingScreen").style.display = "None";
         document.run = function () {
             Program.setSourcecode(document.getElementById("sourceCode").value);
         }
         document.recompose = function () {
             Program.recompose();
         }
-        document.callLambda = function (id){
+        document.callLambda = function (id) {
             Program.callLambda(id);
         }
     </script>
 </head>
-<body>
-<div style="min-height: 35vh; min-width: 50vw; outline: black solid 1px;" id="root-container">
+<body style="overflow: hidden" id="body">
+<label for="root-container">Output UI:</label>
+<div style="min-height: 35vh; min-width: 50vw; outline: black solid 1px;" id="root-container" class="block">
 
 </div>
 <br>
 <br>
-<textarea id="sourceCode" style="min-width: 600px; min-height: 400px">
+<label for="sourceCode">Source Code:</label>
+<textarea id="sourceCode" style="min-width: 600px; min-height: 400px" class="block">
         {{srcGoesHere}}
 </textarea>
-<h2 id="loadingMsg">Loading composer...</h2>
-<button onclick="document.run()">Run</button>
-<button onclick="document.recompose()">Recompose</button>
+<div class="loading-screen" id="loadingScreen" style="display: none">
+    <h1>Loading WebComposition Runtime...</h1>
+    <p>This might take a few seconds for the first time</p>
+</div>
+<div class="block">
+    <button onclick="document.run()">Run</button>
+    <button onclick="document.recompose()">Recompose</button>
+</div>
+
 </body>
 
 </html>
