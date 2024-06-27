@@ -4,6 +4,40 @@ WebComposition is a composition based UI Framework for the web. It is based on a
 The Programming Language is an interpreted language and the interpreter is written in C# meaning it can run nearly everywhere but most importantly:
 in the Web as WASM.
 
+## Quickstart
+
+The easiest way to run WebComposition for yourself is to use the Live Editor hosted [here](https://zenonet.de/interactive/webcomposition).
+There, you can make changes to the source code, hit run and see your UI in action.
+
+Example to start with:
+
+```
+// Initialize the counter variable with 0. The init keyword is needed so that the variable is not reassigned everytime the UI updates
+counter = init 0
+// Align every UI element with this block in a column
+Column{
+    // Display the current counter value. This will update automatically when counter is changed
+    Text(counter)
+    
+    // Align the 2 button next to each other
+    Row{
+    
+        Button({ // The code within this block will be executed when the Button is clicked
+            counter = counter + 1 // Increment counter. You can also write this as counter++ but I want to encourage playing around with expressions
+        }){
+            Text("Increment")
+        }
+        
+        Button({
+            counter = counter - 1 // Decrement counter. Again, you could also write counter--
+        }){
+            Text("Decrement")
+        }
+        
+    }
+}
+```
+
 ## What makes WebComposition unique?
 
 WebComposition is heavily inspired by Jetpack Compose for Android however in constrast to Jetpack Compose, WebComposition runs in the Web and

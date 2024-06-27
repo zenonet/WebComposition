@@ -22,7 +22,7 @@ public class Interpreter
             };
         }
 
-        if ("+-*/<>".Contains(src[0]))
+        if ("+-*/<>".Contains(src[0]) && src[1] != '/') // && is a quick fix for parse detecting comments as divide operations
         {
             char op = src[0];
             src = src[1..];
@@ -46,7 +46,7 @@ public class Interpreter
         SkipNonStatementDelimitingWhitespace(ref src);
         if (src.Length == 0) return firstExecutable;
 
-        SkipWhitespace(ref src);
+        SkipNonStatementDelimitingWhitespace(ref src);
 
         // If this is not an expression
         OperatorType o = GetNextOperator(ref src);
@@ -61,9 +61,9 @@ public class Interpreter
 
         while (true)
         {
-            SkipWhitespace(ref src);
+            SkipNonStatementDelimitingWhitespace(ref src);
             operands.Add(ParseExecutableWithoutExpressions(ref src));
-            SkipWhitespace(ref src);
+            SkipNonStatementDelimitingWhitespace(ref src);
 
             SkipNonStatementDelimitingWhitespace(ref src);
 
@@ -121,7 +121,7 @@ public class Interpreter
     public Executable ParseExecutableWithoutExpressions(ref ReadOnlySpan<char> src)
     {
         Executable exe = ParseExecutableWithoutExtensions(ref src);
-        SkipWhitespace(ref src);
+        SkipNonStatementDelimitingWhitespace(ref src);
         if (src.Length > 0 && src[0] == '?')
         {
             src = src[1..];
@@ -148,10 +148,10 @@ public class Interpreter
     {
         Match match;
         SkipWhitespace(ref src);
-
+        string srcAsString = src.ToString();
+        
         #region Parse Variable Setters
 
-        string srcAsString = src.ToString();
         match = Regex.Match(srcAsString, @"^([A-z]\w*)\s*=(?!=)\s*(init)?\s*");
         if (match.Success)
         {
@@ -395,9 +395,21 @@ public class Interpreter
 
     void SkipWhitespace(ref ReadOnlySpan<char> src)
     {
-        while (src.Length > 0 && char.IsWhiteSpace(src[0]))
+        bool isInComment = false;
+        while (src.Length > 0 && (char.IsWhiteSpace(src[0]) || isInComment) || src.StartsWith("//"))
         {
-            if (src[0] == '\n') Line++;
+            if (src.StartsWith("//"))
+            {
+                isInComment = true;
+                src = src[2..];
+                continue;
+            }
+            
+            if (src[0] == '\n')
+            {
+                Line++;
+                isInComment = false;
+            }
             src = src[1..];
         }
     }

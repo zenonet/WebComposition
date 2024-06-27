@@ -5,7 +5,6 @@
     <title>WebCompositionApp</title>
     <style>
         .button {
-            background: white;
             border-radius: 3pt;
             border-width: 1.2pt;
             padding: 3pt;
@@ -59,6 +58,7 @@
             display: flex;
             flex-direction: column;
             font-family: "Segoe UI", sans-serif;
+            color:black
         }
 
         .block {
@@ -77,6 +77,9 @@
         button:active{
             padding: 8px;
             margin: 2px;
+        }
+        a{
+            color:black
         }
 
     </style>
@@ -131,17 +134,29 @@
 <br>
 <br>
 <label for="sourceCode">Source Code:</label>
-<textarea id="sourceCode" style="min-width: 600px; min-height: 400px" class="block">
+<textarea id="sourceCode" style="min-width: 600px; min-height: 400px; outline: black solid 1px; border-style: none" class="block">
         {{srcGoesHere}}
 </textarea>
-<div class="loading-screen" id="loadingScreen" style="display: none">
-    <h1>Loading WebComposition Runtime...</h1>
-    <p>This might take a few seconds for the first time</p>
-</div>
+
 <div class="block">
     <button onclick="document.run()">Run</button>
     <button onclick="document.recompose()">Recompose</button>
 </div>
+
+<div class="block">
+    <h2>What even is this?</h2>
+    <p>This is a live editor for the <a href="http://github.com/zenonet/WebComposition">WebComposition programming language and UI framework</a>.
+    It allows you to write UI in declarative code while still having imperative parts for e.g. calculations. It is based on a runtime written in C# and renders UI as HTML.</p>
+    
+    <p>To get started writing some UI, consider reading the <a href="http://github.com/zenonet/WebComposition">readme file in the git repo</a>.</p>
+</div>
+
+
+<div class="loading-screen" id="loadingScreen" style="display: none">
+    <h1>Loading WebComposition Runtime...</h1>
+    <p>This might take a few seconds for the first time</p>
+</div>
+
 
 </body>
 
