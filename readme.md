@@ -73,3 +73,8 @@ Currently, the following language features are implemented:
     - Text
 - Expression Parsing (mathematical and comparison expression support as you would expect it for a programming language)
 - Single line comments (//)
+
+## Building from source
+
+To build from source, clone this repo, build the solution and run the Buildtool project.
+This will copy all files to /WebComposition/WebCompositionApp/. From there, you need to host them using a http server and open the index.html file in a browser.
