@@ -26,11 +26,16 @@ public static partial class Program
             sw.Stop();
             Log($"Parsing took {sw.Elapsed.TotalMilliseconds}ms");
         }
+        catch (LanguageException e)
+        {
+            ShowError($"Error {(e.LineNumber != -1 ? $"in line {e.LineNumber}" : "")}: " + e.Message);
+            return;
+        }
         catch (Exception e)
         {
-            ShowError(e.Message);
+            ShowError("Internal Error:" + e.Message);
+            return;
         }
-
         
         foreach (KeyValuePair<string, Variable> var in VariableSetter.VariableValues)
         {
@@ -76,9 +81,13 @@ public static partial class Program
             Log($"Recomposition took {sw.Elapsed.TotalMilliseconds}ms");
             ApplyRecomposition(html);
         }
+        catch (LanguageException e)
+        {
+            ShowError($"Error in line {e.LineNumber}: " + e.Message);
+        }
         catch (Exception e)
         {
-            ShowError(e.Message);
+            ShowError("Error:" + e.Message);
         }
 
         isComposing = false;

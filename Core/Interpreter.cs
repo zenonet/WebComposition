@@ -113,7 +113,7 @@ public class Interpreter
             currentPriority--;
         }
 
-        if (operands.Count > 1) throw new("There are more than one operand left from expression parsing. Something must've gone wrong. I am sorry.");
+        if (operands.Count > 1) throw new LanguageException("There are more than one operand left from expression parsing. Something must've gone wrong. I am sorry.", Line);
 
         return operands[0];
     }
@@ -129,7 +129,7 @@ public class Interpreter
             // Ternary conditional operator
             Executable positive = ParseExecutable(ref src);
             SkipWhitespace(ref src);
-            if (src[0] != ':') throw new("Ternary conditional operator without negative value (: is missing)");
+            if (src[0] != ':') throw new LanguageException("Ternary conditional operator without negative value (: is missing)", Line);
             src = src[1..];
             SkipWhitespace(ref src);
             Executable negative = ParseExecutable(ref src);
@@ -138,6 +138,7 @@ public class Interpreter
                 Condition = exe,
                 PositiveValue = positive,
                 NegativeValue = negative,
+                LineNumber = Line,
             };
         }
 
@@ -166,6 +167,7 @@ public class Interpreter
 
             return new VariableSetter
             {
+                LineNumber = Line,
                 VariableName = match.Groups[1].Value,
                 Value = executable,
                 IsInitOnly = match.Groups[2].Success,
@@ -186,22 +188,23 @@ public class Interpreter
                 // Parse for loop
                 Executable initExe = ParseExecutable(ref src);
                 SkipWhitespace(ref src);
-                if (src[0] != ';') throw new("Invalid syntax at init statement in for loop");
+                if (src[0] != ';') throw new LanguageException("Invalid syntax at init statement in for loop", Line);
                 src = src[1..];
 
                 Executable condition = ParseExecutable(ref src);
                 SkipWhitespace(ref src);
-                if (src[0] != ';') throw new("Invalid syntax at condition statement in for loop");
+                if (src[0] != ';') throw new LanguageException("Invalid syntax at condition statement in for loop", Line);
                 src = src[1..];
                 Executable incrementStatement = ParseExecutable(ref src); // TODO: Allow all parts of for loop to be empty
                 SkipWhitespace(ref src);
-                if (src[0] != ')') throw new("Invalid syntax at increment statement in for loop");
+                if (src[0] != ')') throw new LanguageException("Invalid syntax at increment statement in for loop", Line);
                 src = src[1..];
 
                 List<Executable> block = ParseBlock(ref src, "for loop");
 
                 return new Loop
                 {
+                    LineNumber = Line,
                     InitStatement = initExe,
                     Condition = condition,
                     IncrementStatement = incrementStatement,
@@ -212,7 +215,7 @@ public class Interpreter
             if (match.Groups[1].Value is "if" or "while")
             {
                 Executable condition = ParseExecutable(ref src);
-                if (src[0] != ')') throw new("Parentheses around if statement condition aren't closed");
+                if (src[0] != ')') throw new LanguageException("Parentheses around if statement condition aren't closed", Line);
                 src = src[1..];
                 SkipWhitespace(ref src);
 
@@ -231,12 +234,14 @@ public class Interpreter
                 return match.Groups[1].Value == "if"
                     ? new IfStatement
                     {
+                        LineNumber = Line,
                         Condition = condition,
                         Block = block,
                         ElseBlock = elseBlock,
                     }
                     : new Loop
                     {
+                        LineNumber = Line,
                         Condition = condition,
                         Block = block,
                     };
@@ -255,12 +260,12 @@ public class Interpreter
             if (Function.ExecutableDefinitions.TryGetValue(composableName, out Type? executableType))
             {
                 Function exe = (Function) FormatterServices.GetUninitializedObject(executableType!);
-
+                exe.LineNumber = Line;
                 var parameters = new List<Executable>();
                 if (src[0] == '{' && exe is BlockComposable) goto block;
                 src = src[1..];
                 parameters = ParseParameters(ref src);
-                if (src[0] != ')') throw new($"Unclosed parentheses in line {Line}");
+                if (src[0] != ')') throw new LanguageException($"Unclosed parentheses", Line);
                 src = src[1..];
                 exe.Parameters = parameters;
                 exe.Dependencies = parameters.SelectMany(x => x.Dependencies ?? []).ToList();
@@ -270,20 +275,20 @@ public class Interpreter
                 // Parse content block
                 if (exe is BlockComposable blockComposable)
                 {
-                    if (src.Length == 0 || src[0] != '{') throw new($"{composableName} is a block-composable but the call does not provide a block");
+                    if (src.Length == 0 || src[0] != '{') throw new LanguageException($"{composableName} is a block-composable but the call does not provide a block", Line);
                     src = src[1..];
                     SkipWhitespace(ref src);
                     blockComposable.Block = ParseExecutables(ref src);
                     SkipWhitespace(ref src);
 
-                    if (src.Length == 0) throw new($"{composableName}'s content block isn't closed!");
+                    if (src.Length == 0) throw new LanguageException($"{composableName}'s content block isn't closed!", Line);
                     src = src[1..];
                 }
 
                 return exe;
             }
 
-            throw new($"Unknown composable called {composableName} in line {Line}");
+            throw new LanguageException($"Unknown composable called {composableName}", Line);
         }
 
         #endregion
@@ -296,12 +301,13 @@ public class Interpreter
             src = src[match.Length..];
             var executables = ParseExecutables(ref src);
             SkipWhitespace(ref src);
-            if (src[0] != '}') throw new("Lambda block isn't closed!");
+            if (src[0] != '}') throw new LanguageException("Lambda block isn't closed!", Line);
             src = src[1..];
             Lambda.FunctionDefinitions.Add(executables);
             return new Lambda
             {
                 ReferenceValue = new() {FunctionIndex = Lambda.FunctionDefinitions.Count - 1},
+                LineNumber = Line,
             };
         }
 
@@ -313,7 +319,10 @@ public class Interpreter
         if (match.Success)
         {
             src = src[match.Length..];
-            return new ValueCall(new BoolValue {Value = match.Groups[1].Success});
+            return new ValueCall(new BoolValue {Value = match.Groups[1].Success})
+            {
+                LineNumber = Line,
+            };
         }
 
         #endregion
@@ -324,7 +333,10 @@ public class Interpreter
         if (match.Success)
         {
             src = src[match.Length..];
-            return new ValueCall(new StringValue {Value = Regex.Replace(match.Groups[1].Value, @"\\(.)", "$1")});
+            return new ValueCall(new StringValue {Value = Regex.Replace(match.Groups[1].Value, @"\\(.)", "$1")})
+            {
+                LineNumber = Line,
+            };
         }
 
         #endregion
@@ -335,7 +347,10 @@ public class Interpreter
         if (match.Success)
         {
             src = src[match.Length..];
-            return new ValueCall(new IntValue {Value = int.Parse(match.Value)});
+            return new ValueCall(new IntValue {Value = int.Parse(match.Value)})
+            {
+                LineNumber = Line,
+            };
         }
 
         #endregion
@@ -350,13 +365,14 @@ public class Interpreter
             {
                 IsIncrementOperation = match.Groups[2].Success || match.Groups[3].Success,
                 IncrementDirection = match.Groups[2].Success ? (sbyte) 1 : (sbyte) -1,
+                LineNumber = Line,
             };
         }
 
         #endregion
 
-        throw new
-            ($"Invalid syntax in line {Line}");
+        throw new LanguageException
+            ($"Invalid syntax", Line);
     }
 
     public List<Executable> ParseExecutables(string src)
@@ -385,7 +401,7 @@ public class Interpreter
             parameters.Add(ParseExecutable(ref src));
             SkipWhitespace(ref src);
             if (src[0] is not ')' and not ',')
-                throw new($"Invalid syntax in parameter list in line {Line}");
+                throw new LanguageException("Invalid syntax in parameter list", Line);
             if (src[0] == ',') src = src[1..];
             SkipWhitespace(ref src);
         }
@@ -425,14 +441,14 @@ public class Interpreter
 
     List<Executable> ParseBlock(ref ReadOnlySpan<char> src, string statementName)
     {
-        if (src[0] != '{') throw new($"Conditional block of {statementName} statement missing");
+        if (src[0] != '{') throw new LanguageException($"Conditional block of {statementName} statement missing", Line);
         src = src[1..];
 
         List<Executable> block = ParseExecutables(ref src);
 
         SkipWhitespace(ref src);
 
-        if (src[0] != '}') throw new($"Curly brackets around {statementName} statement conditional block aren't closed");
+        if (src[0] != '}') throw new LanguageException($"Curly brackets around {statementName} statement conditional block aren't closed", Line);
         src = src[1..];
         return block;
     }

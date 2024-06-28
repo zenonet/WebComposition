@@ -7,7 +7,7 @@ public class IfStatement : Executable
     public List<Executable>? ElseBlock;
     public override Value Execute()
     {
-        if (Condition.Execute() is not BoolValue condition) throw new("If statement only accepts boolean values as conditions");
+        if (Condition.Execute() is not BoolValue condition) throw new LanguageException("If statement only accepts boolean values as conditions", LineNumber);
         if (condition.Value)
         {
             foreach (Executable e in Block)

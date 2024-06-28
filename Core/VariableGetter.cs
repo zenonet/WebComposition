@@ -15,13 +15,13 @@ public class VariableGetter : Executable
     public override Value Execute()
     {
         if (!VariableSetter.VariableValues.TryGetValue(VariableName, out Variable? var))
-            throw new($"Variable {VariableName} has never been declared");
-        if (var.Value == VoidValue.Uninitialized) throw new($"Variable {VariableName} hasn't been initialized yet.");
+            throw new LanguageException($"Variable {VariableName} has never been declared", LineNumber);
+        if (var.Value == VoidValue.Uninitialized) throw new LanguageException($"Variable {VariableName} hasn't been initialized yet.", LineNumber);
 
         // Increment/Decrement operation
         if(IsIncrementOperation){
             if(var.Value is not IntValue iv){
-                throw new($"Variables of types apart from integers can't be {(IncrementDirection == 1 ? "incremented" : "decremented")}");
+                throw new LanguageException($"Variables of types apart from integers can't be {(IncrementDirection == 1 ? "incremented" : "decremented")}", LineNumber);
             }
             var incrementedValue = new IntValue(){
                 Value = iv.Value + IncrementDirection,

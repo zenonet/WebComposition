@@ -11,6 +11,7 @@ public class Expression : Executable
         var l = LeftOperand.Execute();
         var r = RightOperand.Execute();
 
+        ExpressionHelper.LineNumberForErrors = LineNumber;
         Value result = Operator switch
         {
             OperatorType.Plus => new IntValue {Value = l.As<int>() + r.As<int>()},
@@ -27,17 +28,19 @@ public class Expression : Executable
             OperatorType.LessThan => new BoolValue {Value = l.As<int>() < r.As<int>()},
             OperatorType.LessThanOrEqualTo => new BoolValue {Value = l.As<int>() <= r.As<int>()},
         };
+        ExpressionHelper.LineNumberForErrors = -1;
         return result;
     }
 }
 
 public static class ExpressionHelper
 {
+    public static int LineNumberForErrors = -1;
     public static T As<T>(this Value v)
     {
         var rightType = Value.ValueTranslationTable[typeof(T)];
         if (!rightType.IsAssignableTo(v.GetType()))
-            throw new("Invalid types of operands in expression");
-        return (T) v.GetType().GetProperty("Value")!.GetValue(v)! ?? throw new($"No value property defined in the language abstraction of the {v.GetType().Name} type.");
+            throw new LanguageException("Invalid types of operands in expression", LineNumberForErrors);
+        return (T) v.GetType().GetProperty("Value")!.GetValue(v)! ?? throw new LanguageException($"No value property defined in the language abstraction of the {v.GetType().Name} type.", LineNumberForErrors);
     }
 }

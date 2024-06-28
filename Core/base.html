@@ -105,6 +105,10 @@
         
         Program.showError = (msg) =>{
             console.log("Error: " + msg)
+            
+            // Don#t show internal errors in the UI console
+            if(msg.startsWith("Internal Error:")) return;
+            
             const clone = document.getElementById("errorMsgTmpl").content.cloneNode(true);
             clone.querySelectorAll("span")[0].textContent = msg
             document.getElementById("errorContainer").appendChild(clone);
