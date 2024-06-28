@@ -3,6 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <title>WebCompositionApp</title>
+    <template id="errorMsgTmpl">
+        <div style="background: #c80606; min-height: 25pt; padding: 5px; outline: black solid 2px">
+            <span>Uh, no error, actually</span>
+        </div>
+    </template>
     <style>
         .button {
             border-radius: 3pt;
@@ -58,7 +63,7 @@
             display: flex;
             flex-direction: column;
             font-family: "Segoe UI", sans-serif;
-            color:black
+            color: black
         }
 
         .block {
@@ -66,20 +71,23 @@
         }
 
         label {
-            margin: 15px 15px 0;
+            margin: 15px 15px 0 0;
         }
-        button{
+
+        button {
             background: lightgray;
             border-style: none;
             padding: 10px;
             border-radius: 2px;
         }
-        button:active{
+
+        button:active {
             padding: 8px;
             margin: 2px;
         }
-        a{
-            color:black
+
+        a {
+            color: black
         }
 
     </style>
@@ -94,6 +102,13 @@
         // Subscribing to 'Program.OnMainInvoked'
 
         Program.applyRecomposition = (html) => document.getElementById("root-container").innerHTML = html;
+        
+        Program.showError = (msg) =>{
+            console.log("Error: " + msg)
+            const clone = document.getElementById("errorMsgTmpl").content.cloneNode(true);
+            clone.querySelectorAll("span")[0].textContent = msg
+            document.getElementById("errorContainer").appendChild(clone);
+        } 
 
         document.getElementById('sourceCode').addEventListener('keydown', function (e) {
             if (e.key === 'Tab') {
@@ -116,9 +131,12 @@
         document.getElementById("body").style.overflow = "";
         document.getElementById("loadingScreen").style.display = "None";
         document.run = function () {
+            // Clear errors
+            document.getElementById("errorContainer").innerHTML = "";
             Program.setSourcecode(document.getElementById("sourceCode").value);
         }
         document.recompose = function () {
+            document.getElementById("errorContainer").innerHTML = "";
             Program.recompose();
         }
         document.callLambda = function (id) {
@@ -127,17 +145,29 @@
     </script>
 </head>
 <body style="overflow: hidden" id="body">
-<label for="root-container">Output UI:</label>
+<label for="root-container" style="margin: 15px 0 0 15px;">Output UI:</label>
 <div style="min-height: 35vh; min-width: 50vw; outline: black solid 1px;" id="root-container" class="block">
 
 </div>
 <br>
 <br>
-<label for="sourceCode">Source Code:</label>
-<textarea id="sourceCode" style="min-width: 600px; min-height: 400px; outline: black solid 1px; border-style: none" class="block">
+<div class="block" style="display: flex; min-width: 50vw">
+    <div style="display: flex; flex-direction: column; flex:3">
+        <label for="sourceCode">Source Code:</label>
+        <textarea id="sourceCode" style="height: 400px; outline: black solid 1px; border-style: none; padding: 5px; margin: 15px 15px 15px 0;">
         {{srcGoesHere}}
-</textarea>
+        </textarea>
+    </div>
 
+    <div style="display: flex; flex-direction: column; flex: 1">
+        <label for="errorContainer">Errors:</label>
+        <div id="errorContainer" style="outline: black solid 1px; margin: 15px 0;flex:1;height: 400px; overflow-y: scroll">
+
+        </div>
+    </div>
+
+
+</div>
 <div class="block">
     <button onclick="document.run()">Run</button>
     <button onclick="document.recompose()">Recompose</button>
@@ -145,14 +175,17 @@
 
 <div class="block">
     <h2>What even is this?</h2>
-    <p>This is a live editor for the <a href="http://github.com/zenonet/WebComposition">WebComposition programming language and UI framework</a>.
-    It allows you to write UI in declarative code while still having imperative parts for e.g. calculations. It is based on a runtime written in C# and renders UI as HTML.</p>
-    
-    <p>To get started writing some UI, consider reading the <a href="http://github.com/zenonet/WebComposition">readme file in the git repo</a>.</p>
+    <p>This is a live editor for the <a href="http://github.com/zenonet/WebComposition">WebComposition programming
+        language and UI framework</a>.
+        It allows you to write UI in declarative code while still having imperative parts for e.g. calculations. It is
+        based on a runtime written in C# and renders UI as HTML.</p>
+
+    <p>To get started writing some UI, consider reading the <a href="http://github.com/zenonet/WebComposition">readme
+        file in the git repo</a>.</p>
 </div>
 
 
-<div class="loading-screen" id="loadingScreen" style="display: none">
+<div class="loading-screen" id="loadingScreen">
     <h1>Loading WebComposition Runtime...</h1>
     <p>This might take a few seconds for the first time</p>
 </div>
