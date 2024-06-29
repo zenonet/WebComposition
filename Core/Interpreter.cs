@@ -1,5 +1,4 @@
-﻿using System.Buffers;
-using System.Runtime.Serialization;
+﻿using System.Runtime.Serialization;
 using System.Text.RegularExpressions;
 
 namespace Core;
@@ -143,8 +142,8 @@ public class Interpreter
         }
 
         return exe;
-    }
-
+    } 
+    
     public Executable ParseExecutableWithoutExtensions(ref ReadOnlySpan<char> src)
     {
         Match match;
@@ -252,17 +251,18 @@ public class Interpreter
 
         #region Parse function calls
 
-        match = Regex.Match(srcAsString, @"^[^\S\r\n]*([A-z]\w*) ?[({]");
+        match = Regex.Match(srcAsString, @"^[^\S\r\n]*([A-z]\w*)\s*[({]");
         if (match.Success)
         {
             string composableName = match.Groups[1].Value;
             src = src[(match.Length - 1)..];
             if (Function.ExecutableDefinitions.TryGetValue(composableName, out Type? executableType))
             {
-                Function exe = (Function) FormatterServices.GetUninitializedObject(executableType!);
+                Function exe = (Function) FormatterServices.GetUninitializedObject(executableType)!;
                 exe.LineNumber = Line;
                 var parameters = new List<Executable>();
-                if (src[0] == '{' && exe is BlockComposable) goto block;
+                SkipWhitespace(ref src);
+                if (src[0] == '{' && executableType.IsAssignableTo(typeof(BlockComposable))) goto block; // I have to use IsAssignableTo as a workaround because `is` doesn't work in wasm published builds for some reason 
                 src = src[1..];
                 parameters = ParseParameters(ref src);
                 if (src[0] != ')') throw new LanguageException($"Unclosed parentheses", Line);
