@@ -62,6 +62,16 @@ public static partial class Program
             e.Execute();
         }
     }
+    [JSInvokable]
+    public static void CallLambdaWithArgument(int id, string argument)
+    {
+        List<Executable> lambda = Lambda.FunctionDefinitions[id];
+        Lambda.CurrentLambdaArgument = argument;
+        foreach (Executable e in lambda)
+        {
+            e.Execute();
+        }
+    }
 
     private static bool isComposing;
     [JSInvokable]

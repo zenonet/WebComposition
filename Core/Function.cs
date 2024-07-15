@@ -22,5 +22,6 @@ public abstract class Function : Executable
         {"Column", typeof(Column)},
         {"Row", typeof(Row)},
         {"Button", typeof(Button)},
+        {"TextField", typeof(TextField)},
     };
 }

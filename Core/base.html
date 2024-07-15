@@ -81,7 +81,7 @@
             border-radius: 2px;
         }
 
-        button:active {
+        control-button:active {
             padding: 8px;
             margin: 2px;
         }
@@ -146,6 +146,9 @@
         document.callLambda = function (id) {
             Program.callLambda(id);
         }
+        document.callLambdaWithArgument = function (id, arg) {
+            Program.callLambdaWithArgument(id, arg);
+        }
     </script>
 </head>
 <body style="overflow: hidden" id="body">
@@ -158,9 +161,7 @@
 <div class="block" style="display: flex; min-width: 50vw">
     <div style="display: flex; flex-direction: column; flex:3">
         <label for="sourceCode">Source Code:</label>
-        <textarea id="sourceCode" style="height: 400px; outline: black solid 1px; border-style: none; padding: 5px; margin: 15px 15px 15px 0;">
-        {{srcGoesHere}}
-        </textarea>
+        <textarea id="sourceCode" style="height: 400px; outline: black solid 1px; border-style: none; padding: 5px; margin: 15px 15px 15px 0;">{{srcGoesHere}}</textarea>
     </div>
 
     <div style="display: flex; flex-direction: column; flex: 1">
@@ -173,8 +174,8 @@
 
 </div>
 <div class="block">
-    <button onclick="document.run()">Run</button>
-    <button onclick="document.recompose()">Recompose</button>
+    <button onclick="document.run()" class="control-button">Run</button>
+    <button onclick="document.recompose()" class="control-button">Recompose</button>
 </div>
 
 <div class="block">

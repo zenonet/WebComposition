@@ -14,6 +14,15 @@ public class VariableGetter : Executable
 
     public override Value Execute()
     {
+        if (VariableName == "it")
+        {
+            if (Lambda.CurrentLambdaArgument == null)
+                throw new LanguageException("'it' is not defined in the current context", LineNumber);
+            return new StringValue
+            {
+                Value = Lambda.CurrentLambdaArgument,
+            };
+        }
         if (!VariableSetter.VariableValues.TryGetValue(VariableName, out Variable? var))
             throw new LanguageException($"Variable {VariableName} has never been declared", LineNumber);
         if (var.Value == VoidValue.Uninitialized) throw new LanguageException($"Variable {VariableName} hasn't been initialized yet.", LineNumber);
