@@ -258,7 +258,8 @@ public class Interpreter
             src = src[(match.Length - 1)..];
             if (Function.ExecutableDefinitions.TryGetValue(composableName, out Type? executableType))
             {
-                Function exe = (Function) FormatterServices.GetUninitializedObject(executableType)!;
+                //Function exe = (Function) FormatterServices.GetUninitializedObject(executableType)!; // This doesn't call the constructor
+                Function exe = (Function) Activator.CreateInstance(executableType)!;
                 exe.LineNumber = Line;
                 var parameters = new List<Executable>();
                 SkipWhitespace(ref src);

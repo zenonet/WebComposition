@@ -101,7 +101,11 @@
         Program.log = (msg) => console.log(msg);
         // Subscribing to 'Program.OnMainInvoked'
 
-        Program.applyRecomposition = (html) => document.getElementById("root-container").innerHTML = html;
+        Program.applyRecomposition = (html) => {
+            document.getElementById("root-container").innerHTML = html;
+            document.getElementById(document.lastFocusId)?.focus()
+            // TOOD: Fix that this resets cursor position in input fields
+        };
         
         Program.showError = (msg) =>{
             console.log("Error: " + msg)
@@ -144,9 +148,11 @@
             Program.recompose();
         }
         document.callLambda = function (id) {
+            document.lastFocusId = document.activeElement.id
             Program.callLambda(id);
         }
         document.callLambdaWithArgument = function (id, arg) {
+            document.lastFocusId = document.activeElement.id
             Program.callLambdaWithArgument(id, arg);
         }
     </script>
