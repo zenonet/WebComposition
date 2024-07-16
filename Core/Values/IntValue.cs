@@ -2,6 +2,8 @@
 
 public class IntValue : Value
 {
+    public override string TypeName => "int";
+
     public int Value
     {
         get => (int)O!;
