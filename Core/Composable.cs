@@ -33,7 +33,7 @@ public abstract class Composable : Function
 
     public override Value Execute()
     {
-        if (composableBlockStack.Count < 1) throw new ($"Empty block stack, can't compose {Function.ExecutableDefinitions.FirstOrDefault(x => x.Value == this.GetType()).Key}");
+        if (composableBlockStack.Count < 1) throw new ($"Empty block stack, can't compose {GetFunctionName()}");
         composableBlockStack.Peek().Append(GenerateHtml());
         return VoidValue.I;
     }

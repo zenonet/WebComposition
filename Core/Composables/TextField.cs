@@ -4,8 +4,12 @@ public class TextField : Composable
 {
     public override string GenerateHtml()
     {
-        if (Parameters[0].Execute() is not StringValue sv)
-            throw new ("Text field only accepts strings as their first argument");
+        EnsureParameterCount(2);
+        
+        Value txt = Parameters[0].Execute();
+        if (txt is IntValue iv) txt = new StringValue{Value = iv.Value.ToString()};
+        if (txt is not StringValue sv) throw new ($"The TextField() composable takes a string as it's first parameter but received {txt.TypeName}");
+        
         if (Parameters[1].Execute() is not LambdaReferenceValue lambda)
             throw new ("Text field only accepts strings as their first argument");
 

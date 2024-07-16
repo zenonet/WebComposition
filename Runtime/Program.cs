@@ -85,6 +85,7 @@ public static partial class Program
         isComposing = true;
         try
         {
+            Composable.RecompositionCounter++;
             Stopwatch sw = Stopwatch.StartNew();
             string html = Composable.ExecuteAndGetHtml(ast);
             sw.Stop();

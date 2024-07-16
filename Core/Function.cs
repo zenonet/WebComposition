@@ -1,4 +1,5 @@
 ﻿using Core.Composables;
+using Core.Functions;
 
 namespace Core;
 
@@ -23,5 +24,23 @@ public abstract class Function : Executable
         {"Row", typeof(Row)},
         {"Button", typeof(Button)},
         {"TextField", typeof(TextField)},
+        
+        {"int", typeof(IntConversionFunction)},
     };
+
+    public string GetFunctionName()
+    {
+        return ExecutableDefinitions.FirstOrDefault(x => x.Value == this.GetType()).Key;
+    }
+    
+    protected void EnsureParameterCount(int count)
+    {
+        if (Parameters.Count != count)
+            throw new LanguageException($"The {GetFunctionName()} function takes {count} parameters but received {Parameters.Count}", LineNumber);
+    }
+    protected void EnsureParameterCount(int min, int max)
+    {
+        if (Parameters.Count < min || Parameters.Count > max)
+            throw new LanguageException($"The {GetFunctionName()} function takes between {min} and {max} parameters but received {Parameters.Count}", LineNumber);
+    }
 }

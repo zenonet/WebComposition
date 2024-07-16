@@ -289,7 +289,7 @@ public class Interpreter
                 return exe;
             }
 
-            throw new LanguageException($"Unknown composable called {composableName}", Line);
+            throw new LanguageException($"Unknown function called {composableName}", Line);
         }
 
         #endregion
