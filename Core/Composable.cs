@@ -6,10 +6,10 @@ public abstract class Composable : Function
 {
     public static int RecompositionCounter = 0;
     
-    public static int callIdCounter = 7;
+    public static int callIdCounter = 0;
     private int instanceIdCounter;
     
-    private int callId = -7;
+    private int callId = 0;
     
     private int lastRecomposition = -1;
     protected string GetNewId()

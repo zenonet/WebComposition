@@ -97,40 +97,57 @@
         // Importing compiled ES module.
         import bootsharp, {Program} from "./index.js";
 
+
+        var lastFocusId;
+        var selectionStart;
+        var selectionEnd;
         // Binding 'Program.GetFrontendName' import invoked in C
         Program.log = (msg) => console.log(msg);
         // Subscribing to 'Program.OnMainInvoked'
 
         Program.applyRecomposition = (html) => {
             document.getElementById("root-container").innerHTML = html;
-            document.getElementById(document.lastFocusId)?.focus()
+            
+            
+            if(lastFocusId !== "") {
+                document.getElementById(lastFocusId)?.focus()
+                document.getElementById(lastFocusId)?.setSelectionRange(selectionStart, selectionEnd)
+            }
+
             // TOOD: Fix that this resets cursor position in input fields
         };
-        
-        Program.showError = (msg) =>{
+
+        function saveStateBeforeRecomposition() {
+            lastFocusId = document.activeElement.id
+            selectionStart = document.activeElement.selectionStart
+            selectionEnd = document.activeElement.selectionEnd
+        }
+
+        Program.showError = (msg) => {
             console.log("Error: " + msg)
-            
-            // Don#t show internal errors in the UI console
-            if(msg.startsWith("Internal Error:")) return;
-            
+
+            // Don't show internal errors in the UI console
+            if (msg.startsWith("Internal Error:")) return;
+
             const clone = document.getElementById("errorMsgTmpl").content.cloneNode(true);
             clone.querySelectorAll("span")[0].textContent = msg
             document.getElementById("errorContainer").appendChild(clone);
-        } 
+        }
 
         document.getElementById('sourceCode').addEventListener('keydown', function (e) {
             if (e.key === 'Tab') {
                 e.preventDefault();
-                var start = this.selectionStart;
-                var end = this.selectionEnd;
+                const start = this.selectionStart;
+                const end = this.selectionEnd;
 
+                const tabValue = "    "
                 // set textarea value to: text before caret + tab + text after caret
                 this.value = this.value.substring(0, start) +
-                    "\t" + this.value.substring(end);
+                    tabValue + this.value.substring(end);
 
                 // put caret at right position again
                 this.selectionStart =
-                    this.selectionEnd = start + 1;
+                    this.selectionEnd = start + tabValue.length;
             }
         });
 
@@ -148,11 +165,11 @@
             Program.recompose();
         }
         document.callLambda = function (id) {
-            document.lastFocusId = document.activeElement.id
+            saveStateBeforeRecomposition()
             Program.callLambda(id);
         }
         document.callLambdaWithArgument = function (id, arg) {
-            document.lastFocusId = document.activeElement.id
+            saveStateBeforeRecomposition()
             Program.callLambdaWithArgument(id, arg);
         }
     </script>
@@ -167,12 +184,14 @@
 <div class="block" style="display: flex; min-width: 50vw">
     <div style="display: flex; flex-direction: column; flex:3">
         <label for="sourceCode">Source Code:</label>
-        <textarea id="sourceCode" style="height: 400px; outline: black solid 1px; border-style: none; padding: 5px; margin: 15px 15px 15px 0;">{{srcGoesHere}}</textarea>
+        <textarea id="sourceCode"
+                  style="height: 400px; outline: black solid 1px; border-style: none; padding: 5px; margin: 15px 15px 15px 0;">{{srcGoesHere}}</textarea>
     </div>
 
     <div style="display: flex; flex-direction: column; flex: 1">
         <label for="errorContainer">Errors:</label>
-        <div id="errorContainer" style="outline: black solid 1px; margin: 15px 0;flex:1;height: 400px; overflow-y: scroll">
+        <div id="errorContainer"
+             style="outline: black solid 1px; margin: 15px 0;flex:1;height: 400px; overflow-y: scroll">
 
         </div>
     </div>
