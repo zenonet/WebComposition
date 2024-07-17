@@ -150,6 +150,41 @@ public class Interpreter
         SkipWhitespace(ref src);
         string srcAsString = src.ToString();
         
+        #region Parse function definitions
+
+        match = Regex.Match(srcAsString, @"^def (\w+)\(");
+        if (match.Success)
+        {
+            src = src[match.Length..];
+            string functionName = match.Groups[1].Value;
+            
+            // TODO: Parse parameter names here
+            
+            if (src[0] != ')') throw new LanguageException($"Parameter list of function definition for '{functionName}()' is not closed", Line);
+            src = src[1..];
+            
+            SkipWhitespace(ref src);
+            
+            // Parse implementation block:
+            if (src[0] != '{') throw new LanguageException($"Expected implementation block for function definition for '{functionName}()'", Line);
+            src = src[1..];
+
+            FunctionDefinition definition = new()
+            {
+                Name = functionName,
+                ParameterNames = [],
+                Executables = ParseExecutables(ref src),
+            };
+            if (src[0] != '}') throw new LanguageException($"Implementation block for function '{functionName}()' isn't closed!", Line);
+            src = src[1..];
+            
+            Lambda.FunctionDefinitions.Add(definition);
+
+            return new ValueCall(VoidValue.I);
+        }
+
+        #endregion
+        
         #region Parse Variable Setters
 
         match = Regex.Match(srcAsString, @"^([A-z]\w*)\s*=(?!=)\s*(init)?\s*");
@@ -289,7 +324,19 @@ public class Interpreter
                 return exe;
             }
 
-            throw new LanguageException($"Unknown function called {composableName}", Line);
+            FunctionDefinition? customFunctionDefinition = Lambda.FunctionDefinitions.FirstOrDefault(x => x.Name == functionName);
+            if (customFunctionDefinition != null)
+            {
+
+                if (!src.StartsWith("()")) throw new LanguageException("Non empty parameter lists aren't supported yet.", Line);
+                src = src[2..];
+                return new CustomFunctionCall
+                {
+                    Definition = customFunctionDefinition,
+                };
+            }
+
+            throw new LanguageException($"Unknown function called {functionName}", Line);
         }
 
         #endregion
