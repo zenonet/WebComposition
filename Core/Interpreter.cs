@@ -254,9 +254,9 @@ public class Interpreter
         match = Regex.Match(srcAsString, @"^[^\S\r\n]*([A-z]\w*)\s*[({]");
         if (match.Success)
         {
-            string composableName = match.Groups[1].Value;
+            string functionName = match.Groups[1].Value;
             src = src[(match.Length - 1)..];
-            if (Function.ExecutableDefinitions.TryGetValue(composableName, out Type? executableType))
+            if (Function.ExecutableDefinitions.TryGetValue(functionName, out Type? executableType))
             {
                 //Function exe = (Function) FormatterServices.GetUninitializedObject(executableType)!; // This doesn't call the constructor
                 Function exe = (Function) Activator.CreateInstance(executableType)!;
@@ -276,13 +276,13 @@ public class Interpreter
                 // Parse content block
                 if (exe is BlockComposable blockComposable)
                 {
-                    if (src.Length == 0 || src[0] != '{') throw new LanguageException($"{composableName} is a block-composable but the call does not provide a block", Line);
+                    if (src.Length == 0 || src[0] != '{') throw new LanguageException($"{functionName} is a block-composable but the call does not provide a block", Line);
                     src = src[1..];
                     SkipWhitespace(ref src);
                     blockComposable.Block = ParseExecutables(ref src);
                     SkipWhitespace(ref src);
 
-                    if (src.Length == 0) throw new LanguageException($"{composableName}'s content block isn't closed!", Line);
+                    if (src.Length == 0) throw new LanguageException($"{functionName}'s content block isn't closed!", Line);
                     src = src[1..];
                 }
 
@@ -300,11 +300,17 @@ public class Interpreter
         if (match.Success)
         {
             src = src[match.Length..];
-            var executables = ParseExecutables(ref src);
+            
+            FunctionDefinition definition = new()
+            {
+                ParameterNames = [],
+                Executables = ParseExecutables(ref src),
+            };
+            Lambda.FunctionDefinitions.Add(definition);
+
             SkipWhitespace(ref src);
             if (src[0] != '}') throw new LanguageException("Lambda block isn't closed!", Line);
             src = src[1..];
-            Lambda.FunctionDefinitions.Add(executables);
             return new Lambda
             {
                 ReferenceValue = new() {FunctionIndex = Lambda.FunctionDefinitions.Count - 1},
