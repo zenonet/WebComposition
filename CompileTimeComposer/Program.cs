@@ -18,9 +18,21 @@ foreach ((string? key, Variable? value) in VariableSetter.VariableValues)
         Console.WriteLine($"Variable {key} was changed to {value.Value}");
     });
 }
-sw = Stopwatch.StartNew();
-string html = Composable.ExecuteAndGetHtml(exes);
-sw.Stop();
-Console.WriteLine($"Composition took {sw.Elapsed.TotalMilliseconds}ms");
-File.WriteAllText("../../../../Core/out.html", html);
-Console.WriteLine(html);
+
+try
+{
+    sw = Stopwatch.StartNew();
+    string html = Composable.ExecuteAndGetHtml(exes);
+    sw.Stop();
+    
+    Console.WriteLine($"Composition took {sw.Elapsed.TotalMilliseconds}ms");
+    File.WriteAllText("../../../../Core/out.html", html);
+    Console.WriteLine(html);
+
+}
+catch (LanguageException e)
+{
+    Console.WriteLine($"Language error in line {e.LineNumber}");
+    throw;
+}
+

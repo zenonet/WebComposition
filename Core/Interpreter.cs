@@ -159,10 +159,10 @@ public class Interpreter
 
             #region Extract parameter names
 
-            int endIndex = src.IndexOf(')') - 1;
-            string[] parameterNames = Regex.Matches(src[..endIndex].ToString(), @"^\s*(\w+)(?:\s*,\s*(?!\)))")
+            int endIndex = src.IndexOf(')');
+            string[] parameterNames = Regex.Matches(src[..endIndex].ToString(), @"\s*(\w+)(?:\s*,\s*(?!\)))?")
                 .Select(x => x.Groups[1].Value).ToArray();
-            src = src[(endIndex + 1)..];
+            src = src[endIndex..];
 
             #endregion
 
