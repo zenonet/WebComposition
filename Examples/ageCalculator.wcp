@@ -1,0 +1,29 @@
+// This example provides a GUI with input fields for name, year of birth and age of a person.
+// When age or year of birth is changed, the other one is adjusted accordingly in realtime
+text = init "Joe"
+yearOfBirth = init 1999
+Column{
+    Row{
+        Text("Name:")
+        TextField(text,
+        {
+            // 'it' is an implicitly declared parameter of the lambda that contains the current value of the TextField
+            text = it
+        })
+    }
+    Row{
+        Text("Year of birth:")
+        TextField(yearOfBirth,
+        {
+            // the int() function converts a string to an int
+            yearOfBirth = int(it)
+        })
+    }
+    Row{
+        Text("Age:")
+        TextField(2024 - yearOfBirth, 
+        {
+            yearOfBirth = 2024 - int(it)
+        })
+    }
+}
