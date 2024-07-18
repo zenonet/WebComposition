@@ -68,14 +68,16 @@ Currently, the following language features are implemented:
 - Variables (automatically trigger recompositions on change)
 - if statements
 - for and while loops
-- Value system (currently, there are ints, bools and strings)
+- Value system (currently, there are ints, bools, strings and lambda functions)
 - Composables
     - Row
     - Column
     - Button (with onclick event)
     - Text
+    - TextField (with onchange event)
 - Expression Parsing (mathematical and comparison expression support as you would expect it for a programming language)
 - Single line comments (//)
+- Custom function/composable definitions with parameters but no return values
 
 ## Building from source
 
