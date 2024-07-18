@@ -1,5 +1,8 @@
-﻿namespace Core;
+﻿using System.Diagnostics.CodeAnalysis;
 
+namespace Core;
+
+[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors)]
 public class Expression : Executable
 {
     public Executable LeftOperand;
@@ -11,6 +14,14 @@ public class Expression : Executable
         var l = LeftOperand.Execute();
         var r = RightOperand.Execute();
 
+        // Allow string concatenation
+        if (l is StringValue leftString)
+        {
+            var rightString = StringValue.ConvertToString(r, LineNumber);
+
+            return new StringValue {Value = leftString.Value + rightString.Value};
+        }
+
         ExpressionHelper.LineNumberForErrors = LineNumber;
         Value result = Operator switch
         {
@@ -18,13 +29,13 @@ public class Expression : Executable
             OperatorType.Minus => new IntValue {Value = l.As<int>() - r.As<int>()},
             OperatorType.Multiply => new IntValue {Value = l.As<int>() * r.As<int>()},
             OperatorType.Divide => new IntValue {Value = l.As<int>() / r.As<int>()},
-            
-            
+
+
             OperatorType.Equals => new BoolValue {Value = l.As<int>() == r.As<int>()},
-            
+
             OperatorType.GreaterThan => new BoolValue {Value = l.As<int>() > r.As<int>()},
             OperatorType.GreaterThanOrEqualTo => new BoolValue {Value = l.As<int>() >= r.As<int>()},
-            
+
             OperatorType.LessThan => new BoolValue {Value = l.As<int>() < r.As<int>()},
             OperatorType.LessThanOrEqualTo => new BoolValue {Value = l.As<int>() <= r.As<int>()},
         };
@@ -36,6 +47,7 @@ public class Expression : Executable
 public static class ExpressionHelper
 {
     public static int LineNumberForErrors = -1;
+
     public static T As<T>(this Value v)
     {
         var rightType = Value.ValueTranslationTable[typeof(T)];
