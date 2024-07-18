@@ -1,4 +1,5 @@
-﻿using System.Text.RegularExpressions;
+﻿using System.Runtime.CompilerServices;
+using System.Text.RegularExpressions;
 
 namespace Core;
 
@@ -299,6 +300,14 @@ public class Interpreter
         {
             string functionName = match.Groups[1].Value;
             src = src[(match.Length - 1)..];
+            if (functionName == "content")
+            {
+                // REFACTOR
+                return new ContentComposableCall
+                {
+                    Definition = null!,
+                };
+            }
             if (Function.ExecutableDefinitions.TryGetValue(functionName, out Type? executableType))
             {
                 //Function exe = (Function) FormatterServices.GetUninitializedObject(executableType)!; // This doesn't call the constructor
@@ -335,20 +344,52 @@ public class Interpreter
             FunctionDefinition? customFunctionDefinition = Lambda.FunctionDefinitions.FirstOrDefault(x => x.Name == functionName);
             if (customFunctionDefinition != null)
             {
+                List<Executable> parameters;
+
+                if (src[0] == '{')
+                {
+                    parameters = [];
+                    goto block;
+                }
+
                 if (!src.StartsWith("(")) throw new LanguageException($"Expected parameter list at {(customFunctionDefinition.IsComposable ? "composable" : "function")} call to '{functionName}()'", Line);
 
                 src = src[1..];
 
-                List<Executable> parameters = ParseParameters(ref src);
+                parameters = ParseParameters(ref src);
 
                 if (!src.StartsWith(")")) throw new LanguageException($"Parentheses for {(customFunctionDefinition.IsComposable ? "composable" : "function")} call to '{functionName}()' are not closed", Line);
                 src = src[1..];
+                
+                // I am so sorry, I am kind of too tired to do anything properly, so I just start using goto aggressively. Either I need to give up the project because of this, or I need to sped A LOT of time refactoring.
+                // Kinda funny that GitHub copilot is trained on this 
+                // REFACTOR
+                block:
+                FunctionDefinition? contentBlock = null;
+                SkipWhitespace(ref src);
+                // Parse content block
+                if (src.Length == 0 || src[0] != '{') goto ret;
+                src = src[1..];
+                SkipWhitespace(ref src);
+                contentBlock = new()
+                {
+                    Executables = ParseExecutables(ref src),
+                    IsComposable = true,
+                    Name = "content",
+                    ParameterNames = [],
+                };
+                SkipWhitespace(ref src);
 
+                if (src.Length == 0) throw new LanguageException($"{functionName}'s content block isn't closed!", Line);
+                src = src[1..];
+
+                ret:
                 return customFunctionDefinition.IsComposable
                     ? new CustomComposableCall
                     {
                         Definition = customFunctionDefinition,
                         Parameters = parameters,
+                        ContentBlock = contentBlock
                     }
                     : new CustomFunctionCall
                     {
