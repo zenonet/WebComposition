@@ -158,6 +158,9 @@ public class Interpreter
             src = src[match.Length..];
             string functionName = match.Groups[2].Value;
 
+            if (functionName == "Content")
+                throw new LanguageException("'Content' is a reserved name. You can't name a function or composable like that", Line);
+            
             #region Extract parameter names
 
             int endIndex = src.IndexOf(')');
@@ -300,8 +303,10 @@ public class Interpreter
         {
             string functionName = match.Groups[1].Value;
             src = src[(match.Length - 1)..];
-            if (functionName == "content")
+            if (functionName == "Content")
             {
+                if (!src.StartsWith("()")) throw new LanguageException("Content function can't receive parameters", Line);
+                src = src[2..];
                 // REFACTOR
                 return new ContentComposableCall
                 {
