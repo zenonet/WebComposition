@@ -1,5 +1,4 @@
-﻿using System.Runtime.Serialization;
-using System.Text.RegularExpressions;
+﻿using System.Text.RegularExpressions;
 
 namespace Core;
 
@@ -142,14 +141,14 @@ public class Interpreter
         }
 
         return exe;
-    } 
-    
+    }
+
     public Executable ParseExecutableWithoutExtensions(ref ReadOnlySpan<char> src)
     {
         Match match;
         SkipWhitespace(ref src);
         string srcAsString = src.ToString();
-        
+
         #region Parse function definitions
 
         match = Regex.Match(srcAsString, @"^def (\w+)\(");
@@ -157,14 +156,22 @@ public class Interpreter
         {
             src = src[match.Length..];
             string functionName = match.Groups[1].Value;
-            
-            // TODO: Parse parameter names here
-            
+
+            #region Extract parameter names
+
+            int endIndex = src.IndexOf(')') - 1;
+            string[] parameterNames = Regex.Matches(src[..endIndex].ToString(), @"^\s*(\w+)(?:\s*,\s*(?!\)))")
+                .Select(x => x.Groups[1].Value).ToArray();
+            src = src[(endIndex + 1)..];
+
+            #endregion
+
+
             if (src[0] != ')') throw new LanguageException($"Parameter list of function definition for '{functionName}()' is not closed", Line);
             src = src[1..];
-            
+
             SkipWhitespace(ref src);
-            
+
             // Parse implementation block:
             if (src[0] != '{') throw new LanguageException($"Expected implementation block for function definition for '{functionName}()'", Line);
             src = src[1..];
@@ -172,19 +179,19 @@ public class Interpreter
             FunctionDefinition definition = new()
             {
                 Name = functionName,
-                ParameterNames = [],
+                ParameterNames = parameterNames,
                 Executables = ParseExecutables(ref src),
             };
             if (src[0] != '}') throw new LanguageException($"Implementation block for function '{functionName}()' isn't closed!", Line);
             src = src[1..];
-            
+
             Lambda.FunctionDefinitions.Add(definition);
 
             return new ValueCall(VoidValue.I);
         }
 
         #endregion
-        
+
         #region Parse Variable Setters
 
         match = Regex.Match(srcAsString, @"^([A-z]\w*)\s*=(?!=)\s*(init)?\s*");
@@ -327,12 +334,19 @@ public class Interpreter
             FunctionDefinition? customFunctionDefinition = Lambda.FunctionDefinitions.FirstOrDefault(x => x.Name == functionName);
             if (customFunctionDefinition != null)
             {
+                if (!src.StartsWith("(")) throw new LanguageException($"Expected parameter list at function call to '{functionName}()'", Line);
 
-                if (!src.StartsWith("()")) throw new LanguageException("Non empty parameter lists aren't supported yet.", Line);
-                src = src[2..];
+                src = src[1..];
+
+                List<Executable> parameters = ParseParameters(ref src);
+
+                if (!src.StartsWith(")")) throw new LanguageException($"Parentheses for function call to '{functionName}()' are not closed", Line);
+                src = src[1..];
+
                 return new CustomFunctionCall
                 {
                     Definition = customFunctionDefinition,
+                    Parameters = parameters,
                 };
             }
 
@@ -347,7 +361,7 @@ public class Interpreter
         if (match.Success)
         {
             src = src[match.Length..];
-            
+
             FunctionDefinition definition = new()
             {
                 ParameterNames = [],
@@ -434,6 +448,7 @@ public class Interpreter
         ReadOnlySpan<char> charSpan = src.AsSpan();
         return ParseExecutables(ref charSpan);
     }
+
     public List<Executable> ParseExecutables(ref ReadOnlySpan<char> src)
     {
         List<Executable> exes = new();
@@ -474,12 +489,13 @@ public class Interpreter
                 src = src[2..];
                 continue;
             }
-            
+
             if (src[0] == '\n')
             {
                 Line++;
                 isInComment = false;
             }
+
             src = src[1..];
         }
     }
