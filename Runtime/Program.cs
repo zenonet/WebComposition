@@ -56,8 +56,8 @@ public static partial class Program
     [JSInvokable]
     public static void CallLambda(int id)
     {
-        List<Executable> lambda = Lambda.FunctionDefinitions[id];
-        foreach (Executable e in lambda)
+        FunctionDefinition lambda = Lambda.FunctionDefinitions[id];
+        foreach (Executable e in lambda.Executables)
         {
             e.Execute();
         }
@@ -65,9 +65,9 @@ public static partial class Program
     [JSInvokable]
     public static void CallLambdaWithArgument(int id, string argument)
     {
-        List<Executable> lambda = Lambda.FunctionDefinitions[id];
+        FunctionDefinition lambda = Lambda.FunctionDefinitions[id];
         Lambda.CurrentLambdaArgument = argument;
-        foreach (Executable e in lambda)
+        foreach (Executable e in lambda.Executables)
         {
             e.Execute();
         }
