@@ -454,7 +454,7 @@ public class Interpreter
         if (match.Success)
         {
             src = src[match.Length..];
-            return new ValueCall(new StringValue {Value = Regex.Replace(match.Groups[1].Value, @"\\(.)", "$1")})
+            return new ValueCall(new StringValue {Value = match.Groups[1].Value})
             {
                 LineNumber = Line,
             };
