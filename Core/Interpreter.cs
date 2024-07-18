@@ -165,7 +165,7 @@ public class Interpreter
 
             int endIndex = src.IndexOf(')');
             string[] parameterNames = Regex.Matches(src[..endIndex].ToString(), @"\s*(\w+)(?:\s*,\s*(?!\)))?")
-                .Select(x => x.Groups[2].Value).ToArray();
+                .Select(x => x.Groups[1].Value).ToArray();
             src = src[endIndex..];
 
             #endregion
