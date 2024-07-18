@@ -151,17 +151,17 @@ public class Interpreter
 
         #region Parse function definitions
 
-        match = Regex.Match(srcAsString, @"^def (\w+)\(");
+        match = Regex.Match(srcAsString, @"^(?:func|(comp)) (\w+)\(");
         if (match.Success)
         {
             src = src[match.Length..];
-            string functionName = match.Groups[1].Value;
+            string functionName = match.Groups[2].Value;
 
             #region Extract parameter names
 
             int endIndex = src.IndexOf(')');
             string[] parameterNames = Regex.Matches(src[..endIndex].ToString(), @"\s*(\w+)(?:\s*,\s*(?!\)))?")
-                .Select(x => x.Groups[1].Value).ToArray();
+                .Select(x => x.Groups[2].Value).ToArray();
             src = src[endIndex..];
 
             #endregion
@@ -179,6 +179,7 @@ public class Interpreter
             FunctionDefinition definition = new()
             {
                 Name = functionName,
+                IsComposable = match.Groups[1].Success,
                 ParameterNames = parameterNames,
                 Executables = ParseExecutables(ref src),
             };
@@ -334,20 +335,26 @@ public class Interpreter
             FunctionDefinition? customFunctionDefinition = Lambda.FunctionDefinitions.FirstOrDefault(x => x.Name == functionName);
             if (customFunctionDefinition != null)
             {
-                if (!src.StartsWith("(")) throw new LanguageException($"Expected parameter list at function call to '{functionName}()'", Line);
+                if (!src.StartsWith("(")) throw new LanguageException($"Expected parameter list at {(customFunctionDefinition.IsComposable ? "composable" : "function")} call to '{functionName}()'", Line);
 
                 src = src[1..];
 
                 List<Executable> parameters = ParseParameters(ref src);
 
-                if (!src.StartsWith(")")) throw new LanguageException($"Parentheses for function call to '{functionName}()' are not closed", Line);
+                if (!src.StartsWith(")")) throw new LanguageException($"Parentheses for {(customFunctionDefinition.IsComposable ? "composable" : "function")} call to '{functionName}()' are not closed", Line);
                 src = src[1..];
 
-                return new CustomFunctionCall
-                {
-                    Definition = customFunctionDefinition,
-                    Parameters = parameters,
-                };
+                return customFunctionDefinition.IsComposable
+                    ? new CustomComposableCall
+                    {
+                        Definition = customFunctionDefinition,
+                        Parameters = parameters,
+                    }
+                    : new CustomFunctionCall
+                    {
+                        Definition = customFunctionDefinition,
+                        Parameters = parameters,
+                    };
             }
 
             throw new LanguageException($"Unknown function called {functionName}", Line);
