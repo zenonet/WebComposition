@@ -17,7 +17,7 @@ public class Expression : Executable
         // Allow string concatenation
         if (l is StringValue leftString)
         {
-            var rightString = StringValue.ConvertToString(r, LineNumber);
+            var rightString = r.AsString(LineNumber);
 
             return new StringValue {Value = leftString.Value + rightString.Value};
         }

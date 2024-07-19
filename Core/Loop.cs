@@ -14,8 +14,8 @@ public class Loop : Executable
 
         while (true)
         {
-            if (Condition.Execute() is not BoolValue cond) throw new LanguageException("Condition of loop has to be of boolean type", LineNumber);
-            if (!cond.Value) break;
+            BoolValue shouldContinue = Condition.Execute().AsBool(LineNumber);
+            if (!shouldContinue.Value) break;
             
             foreach (Executable e in Block)
             {
