@@ -26,6 +26,9 @@ public abstract class Function : Executable
         {"TextField", typeof(TextField)},
         
         {"int", typeof(IntConversionFunction)},
+        
+        {"schedulePeriodic", typeof(SchedulePeriodicFunction)},
+        {"schedule", typeof(ScheduleFunction)},
     };
 
     public string GetFunctionName()

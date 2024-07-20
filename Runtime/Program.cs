@@ -1,12 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Threading;
 using Bootsharp;
 using Core;
+using Core.Functions;
+
 public static partial class Program
 {
     public static Interpreter i = new();
     private static List<Executable> ast;
+    private static CancellationTokenSource cancellationTokenSource = new();
     public static void Main ()
     {
     }
@@ -14,11 +18,13 @@ public static partial class Program
     [JSInvokable]
     public static void SetSourcecode(string source)
     {
-        Log("Source: " + source);
         VariableSetter.VariableValues.Clear();
         Lambda.FunctionDefinitions.Clear();
+        cancellationTokenSource.Cancel();
+
         i.Line = 1;
 
+        // TODO: Request cancellation of periodic calls
         try
         {
             Stopwatch sw = Stopwatch.StartNew();
@@ -41,6 +47,10 @@ public static partial class Program
         {
             var.Value.VariableChanged += Recompose;
         }
+
+        cancellationTokenSource.Dispose();
+        cancellationTokenSource = new();
+        SchedulePeriodicFunction.CancellationToken = cancellationTokenSource.Token;
         Recompose();
     }
 
