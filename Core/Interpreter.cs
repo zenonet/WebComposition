@@ -1,5 +1,4 @@
-﻿using System.Runtime.CompilerServices;
-using System.Text.RegularExpressions;
+﻿using System.Text.RegularExpressions;
 namespace Core;
 
 public class Interpreter
@@ -191,7 +190,10 @@ public class Interpreter
 
             Lambda.FunctionDefinitions.Add(definition);
 
-            return new ValueCall(VoidValue.I);
+            return new ValueCall(VoidValue.I)
+            {
+                LineNumber = Line,
+            };
         }
 
         #endregion
@@ -310,6 +312,7 @@ public class Interpreter
                 return new ContentComposableCall
                 {
                     Definition = null!,
+                    LineNumber = Line,
                 };
             }
 
@@ -406,11 +409,13 @@ public class Interpreter
                         Parameters = parameters,
                         ContentBlock = contentBlock,
                         StyleExtension = extension,
+                        LineNumber = Line,
                     }
                     : new CustomFunctionCall
                     {
                         Definition = customFunctionDefinition,
                         Parameters = parameters,
+                        LineNumber = Line,
                     };
             }
 
@@ -461,14 +466,10 @@ public class Interpreter
 
         #region Parse string literals
 
-        match = Regex.Match(srcAsString, @"^""(.*?(?<!\\))""");
-        if (match.Success)
+        if(src[0] == '"')
         {
-            src = src[match.Length..];
-            return new ValueCall(new StringValue {Value = match.Groups[1].Value})
-            {
-                LineNumber = Line,
-            };
+            src = src[1..];
+            return ParseStringLiteral(ref src);
         }
 
         #endregion
@@ -636,4 +637,66 @@ public class Interpreter
         }
         return extension;
     }
+
+    Executable ParseStringLiteral(ref ReadOnlySpan<char> src, Executable? expression = null)
+    {
+        int length = 0;
+        bool isEscaped = false;
+        while (isEscaped || src[length] != '"')
+        {
+            if (!isEscaped && src[length] == '{')
+            {
+                expression = AddLiteralToExpression(ref src, expression, length);
+                src = src[1..];
+                // Add the argument to the concatenation expression
+                var argument = ParseExecutable(ref src);
+                if (src[0] != '}') throw new LanguageException("Unclosed string interpolation", Line);
+                src = src[1..];
+
+                expression = new Expression
+                {
+                    LeftOperand = expression,
+                    RightOperand = argument,
+                };
+                // Recursively continue parsing the string
+                ParseStringLiteral(ref src, expression, true);
+            }
+                
+            if (isEscaped) isEscaped = false;
+            if (!isEscaped && src[length] == '\\')
+            {
+                isEscaped = true;
+            }
+            
+            length++;
+        }
+
+        expression = AddLiteralToExpression(ref src, expression, length);
+        src = src[1..];
+
+        return expression;
+
+        Executable AddLiteralToExpression(ref ReadOnlySpan<char> readOnlySpan, Executable? executable, int len)
+        {
+            string value = new Regex(@"\\(.)").Replace(readOnlySpan[..len].ToString(), "$1");
+            ValueCall literalValueCall = new (new StringValue {Value = value}){LineNumber = Line};
+            if (executable == null)
+            {
+                executable = literalValueCall;
+            }
+            else
+            {
+                // Add the argument to the concatenation expression
+                executable = new Expression
+                {
+                    LeftOperand = executable,
+                    RightOperand = literalValueCall,
+                };
+            }
+
+            readOnlySpan = readOnlySpan[len..];
+            return executable;
+        }
+    }
+    
 }
