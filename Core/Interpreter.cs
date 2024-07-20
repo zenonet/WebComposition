@@ -1,6 +1,5 @@
 ﻿using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
-
 namespace Core;
 
 public class Interpreter
@@ -160,7 +159,7 @@ public class Interpreter
 
             if (functionName == "Content")
                 throw new LanguageException("'Content' is a reserved name. You can't name a function or composable like that", Line);
-            
+
             #region Extract parameter names
 
             int endIndex = src.IndexOf(')');
@@ -313,6 +312,7 @@ public class Interpreter
                     Definition = null!,
                 };
             }
+
             if (Function.ExecutableDefinitions.TryGetValue(functionName, out Type? executableType))
             {
                 //Function exe = (Function) FormatterServices.GetUninitializedObject(executableType)!; // This doesn't call the constructor
@@ -342,7 +342,12 @@ public class Interpreter
                     if (src.Length == 0) throw new LanguageException($"{functionName}'s content block isn't closed!", Line);
                     src = src[1..];
                 }
-
+                
+                if (exe is Composable composable)
+                {
+                    composable.StyleExtension = ParseStyleExtension(ref src);
+                }
+                
                 return exe;
             }
 
@@ -365,7 +370,7 @@ public class Interpreter
 
                 if (!src.StartsWith(")")) throw new LanguageException($"Parentheses for {(customFunctionDefinition.IsComposable ? "composable" : "function")} call to '{functionName}()' are not closed", Line);
                 src = src[1..];
-                
+
                 // I am so sorry, I am kind of too tired to do anything properly, so I just start using goto aggressively. Either I need to give up the project because of this, or I need to sped A LOT of time refactoring.
                 // Kinda funny that GitHub copilot is trained on this 
                 // REFACTOR
@@ -387,14 +392,20 @@ public class Interpreter
 
                 if (src.Length == 0) throw new LanguageException($"{functionName}'s content block isn't closed!", Line);
                 src = src[1..];
-
+                
                 ret:
+                StyleExtension? extension = null;
+                if (customFunctionDefinition.IsComposable)
+                {
+                    extension = ParseStyleExtension(ref src);
+                }
                 return customFunctionDefinition.IsComposable
                     ? new CustomComposableCall
                     {
                         Definition = customFunctionDefinition,
                         Parameters = parameters,
-                        ContentBlock = contentBlock
+                        ContentBlock = contentBlock,
+                        StyleExtension = extension,
                     }
                     : new CustomFunctionCall
                     {
@@ -574,5 +585,45 @@ public class Interpreter
         if (src[0] != '}') throw new LanguageException($"Curly brackets around {statementName} statement conditional block aren't closed", Line);
         src = src[1..];
         return block;
+    }
+
+    StyleExtension? ParseStyleExtension(ref ReadOnlySpan<char> src)
+    {
+        if (!src.StartsWith(".styled")) return null;
+        if (src[7] != '{') throw new LanguageException("Expected style block after .styled extension", Line);
+        src = src[8..];
+        StyleExtension extension = new();
+        
+        while (src.Length > 0 && src[0] != '}')
+        {
+            int colonIndex = src.IndexOf(':');
+            ReadOnlySpan<char> propertyName = src[..colonIndex].Trim();
+            src = src[(colonIndex + 1)..];
+            SkipWhitespace(ref src);
+            Executable exe = ParseExecutable(ref src);
+            
+            SkipWhitespace(ref src);
+
+
+            
+            extension.Styles.Add(new()
+            {
+                PropertyName = propertyName.ToString(),
+                Value = exe,
+            });
+            
+            SkipWhitespace(ref src);
+            if (src[0] is not ',' and not '}')
+                throw new LanguageException("Invalid syntax at style extension", Line);
+            if (src[0] is ',')
+                src = src[1..];
+            SkipWhitespace(ref src);
+            if (src[0] is '}')
+            {
+                src = src[1..];
+                break;
+            }
+        }
+        return extension;
     }
 }

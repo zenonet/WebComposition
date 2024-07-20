@@ -4,7 +4,7 @@ namespace Core;
 
 public class StyleExtension
 {
-    public List<Style> Styles;
+    public List<Style> Styles = new();
     public int LineNumber;
     public string GenerateCss()
     {
@@ -12,8 +12,9 @@ public class StyleExtension
         
         foreach (Style style in Styles)
         {
-            sb.Append($"{style.PropertyName}:{style.Value.Execute().AsString(LineNumber)};");
+            sb.Append($"{style.PropertyName}:{style.Value.Execute().AsString(LineNumber).Value};");
         }
-        throw new NotImplementedException("CSS generation in StyleExtensions hasn't been implemented yet.");
+
+        return sb.ToString();
     }
 }
