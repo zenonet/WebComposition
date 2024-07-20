@@ -587,6 +587,7 @@ public class Interpreter
         return block;
     }
 
+    private readonly string[] cssUnits = ["cm", "mm", "in", "px", "pt", "pc", "em", "ex", "ch", "rem", "vw", "vh", "vmin", "vmax", "%"];
     StyleExtension? ParseStyleExtension(ref ReadOnlySpan<char> src)
     {
         if (!src.StartsWith(".styled")) return null;
@@ -603,13 +604,22 @@ public class Interpreter
             Executable exe = ParseExecutable(ref src);
             
             SkipWhitespace(ref src);
-
-
+            
+            string unit = "";
+            // Allow css units after expression
+            foreach (string u in cssUnits)
+            {
+                if (!src.StartsWith(u)) continue;
+                src = src[u.Length..];
+                unit = u;
+                break;
+            }
             
             extension.Styles.Add(new()
             {
                 PropertyName = propertyName.ToString(),
                 Value = exe,
+                Unit = unit,
             });
             
             SkipWhitespace(ref src);

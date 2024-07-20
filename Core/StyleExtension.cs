@@ -12,7 +12,7 @@ public class StyleExtension
         
         foreach (Style style in Styles)
         {
-            sb.Append($"{style.PropertyName}:{style.Value.Execute().AsString(LineNumber).Value};");
+            sb.Append($"{style.PropertyName}:{style.Value.Execute().AsString(LineNumber).Value}{style.Unit};");
         }
 
         return sb.ToString();
