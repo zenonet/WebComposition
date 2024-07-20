@@ -24,6 +24,7 @@ public abstract class Function : Executable
         {"Row", typeof(Row)},
         {"Button", typeof(Button)},
         {"TextField", typeof(TextField)},
+        {"CheckBox", typeof(CheckBox)},
         
         {"int", typeof(IntConversionFunction)},
         
