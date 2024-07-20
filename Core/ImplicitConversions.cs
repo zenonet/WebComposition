@@ -33,4 +33,11 @@ public static class ImplicitConversions
         if (val is IntValue iv) return new() {Value = iv.Value != 0};
         throw new LanguageException($"Can't implicitly convert {val.TypeName} to bool.", lineNumberForErrorMsg);
     }
+    
+    public static IntValue AsInt(this Value val, int lineNumberForErrorMsg)
+    {
+        if (val is IntValue iv) return iv;
+        if (val is BoolValue bv) return new (){Value = bv.Value ? 1 : 0};
+        throw new LanguageException($"Can't implicitly convert {val.TypeName} to int.", lineNumberForErrorMsg);
+    }
 }
