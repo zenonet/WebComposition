@@ -12,6 +12,8 @@ public abstract class Composable : Function
     private int callId = 0;
     
     private int lastRecomposition = -1;
+
+    public StyleExtension? StyleExtension = null;
     protected string GetNewId()
     {
         if (lastRecomposition != RecompositionCounter)
@@ -21,6 +23,12 @@ public abstract class Composable : Function
             lastRecomposition = RecompositionCounter;
         }
         return $"{callId}_{instanceIdCounter++}";
+    }
+
+    protected string GetStyleStringOrEmpty()
+    {
+        if (StyleExtension == null) return "";
+        return $"style=\"{StyleExtension?.GenerateCss()}\"";
     }
 
     public Composable()

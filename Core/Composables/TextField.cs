@@ -22,6 +22,6 @@ public class TextField : Composable
             if (Parameters[1].Execute() is not LambdaReferenceValue lambda) throw new("Unexpected type at 2. parameter of TextField. Should be a lambda function.");
             onChange = $"onchange=\"document.callLambda({lambda.FunctionIndex})\"";
         }*/
-        return $"<input id=\"{id}\" class=\"composable textfield\" type=\"text\" {oninput} value=\"{sv.Value}\">";
+        return $"<input id=\"{id}\" {GetStyleStringOrEmpty()} class=\"composable textfield\" type=\"text\" {oninput} value=\"{sv.Value}\">";
     }
 }

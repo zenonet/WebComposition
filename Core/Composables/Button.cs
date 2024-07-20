@@ -16,6 +16,6 @@ public class Button : BlockComposable
             }
         }
 
-        return $"<button class=\"button composable\" {onClick}>{ExecuteBlock()}</button>";
+        return $"<button class=\"button composable\" {GetStyleStringOrEmpty()} {onClick}>{ExecuteBlock()}</button>";
     }
 }
