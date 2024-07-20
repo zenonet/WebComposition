@@ -646,7 +646,7 @@ public class Interpreter
         {
             if (!isEscaped && src[length] == '{')
             {
-                expression = AddLiteralToExpression(ref src, expression, length);
+                AddLiteralToExpression(ref src, ref expression, length);
                 src = src[1..];
                 // Add the argument to the concatenation expression
                 var argument = ParseExecutable(ref src);
@@ -659,7 +659,8 @@ public class Interpreter
                     RightOperand = argument,
                 };
                 // Recursively continue parsing the string
-                ParseStringLiteral(ref src, expression, true);
+                expression = ParseStringLiteral(ref src, expression);
+                return expression;
             }
                 
             if (isEscaped) isEscaped = false;
@@ -671,12 +672,12 @@ public class Interpreter
             length++;
         }
 
-        expression = AddLiteralToExpression(ref src, expression, length);
+        AddLiteralToExpression(ref src, ref expression, length);
         src = src[1..];
 
         return expression;
 
-        Executable AddLiteralToExpression(ref ReadOnlySpan<char> readOnlySpan, Executable? executable, int len)
+        void AddLiteralToExpression(ref ReadOnlySpan<char> readOnlySpan, ref Executable? executable, int len)
         {
             string value = new Regex(@"\\(.)").Replace(readOnlySpan[..len].ToString(), "$1");
             ValueCall literalValueCall = new (new StringValue {Value = value}){LineNumber = Line};
@@ -695,7 +696,6 @@ public class Interpreter
             }
 
             readOnlySpan = readOnlySpan[len..];
-            return executable;
         }
     }
     
