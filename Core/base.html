@@ -111,9 +111,10 @@
             
             if(lastFocusId !== "") {
                 let focused = document.getElementById(lastFocusId);
-                if(focused === null || focused.type !== "text") return;
+                if(focused === null) return;
                 
                 focused.focus();
+                if(focused.type !== "text") return;
                 focused.setSelectionRange(selectionStart, selectionEnd)
             }
         };

@@ -14,6 +14,6 @@ public class CheckBox : Composable
         string id = GetNewId();
         string oninput = $"oninput=\"document.callLambdaWithArgument({lambda.FunctionIndex}, document.getElementById('{id}').checked, 'bool')\"";
                 
-        return $"<input id=\"{id}\" type=\"checkbox\" {GetStyleStringOrEmpty()} class=\"composable textfield\" {oninput} {(isChecked.Value ? "checked" : "")}>";
+        return $"<input id=\"{id}\" type=\"checkbox\" {GetStyleStringOrEmpty()} class=\"composable checkbox\" {oninput} {(isChecked.Value ? "checked" : "")}>";
     }
 }

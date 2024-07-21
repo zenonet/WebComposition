@@ -18,10 +18,7 @@ public class VariableGetter : Executable
         {
             if (Lambda.CurrentLambdaArgument == null)
                 throw new LanguageException("'it' is not defined in the current context", LineNumber);
-            return new StringValue
-            {
-                Value = Lambda.CurrentLambdaArgument,
-            };
+            return Lambda.CurrentLambdaArgument;
         }
         if (!VariableSetter.VariableValues.TryGetValue(VariableName, out Variable? var))
             throw new LanguageException($"Variable {VariableName} has never been declared", LineNumber);

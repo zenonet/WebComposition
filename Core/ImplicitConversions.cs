@@ -40,4 +40,10 @@ public static class ImplicitConversions
         if (val is BoolValue bv) return new (){Value = bv.Value ? 1 : 0};
         throw new LanguageException($"Can't implicitly convert {val.TypeName} to int.", lineNumberForErrorMsg);
     }
+    
+    public static LambdaReferenceValue AsLambda(this Value val, int lineNumberForErrorMsg)
+    {
+        if (val is LambdaReferenceValue rv) return rv;
+        throw new LanguageException($"Can't implicitly convert {val.TypeName} to lambda.", lineNumberForErrorMsg);
+    }
 }
