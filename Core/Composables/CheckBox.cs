@@ -12,7 +12,7 @@ public class CheckBox : Composable
             throw new ("CheckBox expects a lambda function as it's second parameter.");
 
         string id = GetNewId();
-        string oninput = $"oninput=\"document.callLambdaWithArgument({lambda.FunctionIndex}, document.getElementById('{id}').checked)\"";
+        string oninput = $"oninput=\"document.callLambdaWithArgument({lambda.FunctionIndex}, document.getElementById('{id}').checked, 'bool')\"";
                 
         return $"<input id=\"{id}\" type=\"checkbox\" {GetStyleStringOrEmpty()} class=\"composable textfield\" {oninput} {(isChecked.Value ? "checked" : "")}>";
     }

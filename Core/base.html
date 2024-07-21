@@ -110,11 +110,12 @@
             
             
             if(lastFocusId !== "") {
-                document.getElementById(lastFocusId)?.focus()
-                document.getElementById(lastFocusId)?.setSelectionRange(selectionStart, selectionEnd)
+                let focused = document.getElementById(lastFocusId);
+                if(focused === null || focused.type !== "text") return;
+                
+                focused.focus();
+                focused.setSelectionRange(selectionStart, selectionEnd)
             }
-
-            // TOOD: Fix that this resets cursor position in input fields
         };
 
         function saveStateBeforeRecomposition() {
@@ -168,9 +169,9 @@
             saveStateBeforeRecomposition()
             Program.callLambda(id);
         }
-        document.callLambdaWithArgument = function (id, arg) {
+        document.callLambdaWithArgument = function (id, arg, type) {
             saveStateBeforeRecomposition()
-            Program.callLambdaWithArgument(id, arg);
+            Program.callLambdaWithArgument(id, arg + "", type);
         }
     </script>
 </head>

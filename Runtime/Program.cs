@@ -73,10 +73,15 @@ public static partial class Program
         }
     }
     [JSInvokable]
-    public static void CallLambdaWithArgument(int id, string argument)
+    public static void CallLambdaWithArgument(int id, string argument, string type)
     {
         FunctionDefinition lambda = Lambda.FunctionDefinitions[id];
-        Lambda.CurrentLambdaArgument = argument;
+        Lambda.CurrentLambdaArgument = type switch
+        {
+            "bool" => new BoolValue {Value = argument == "true"},
+            "string" => new StringValue {Value = argument},
+            "int" => new IntValue {Value = int.Parse(argument)},
+        };
         foreach (Executable e in lambda.Executables)
         {
             e.Execute();
