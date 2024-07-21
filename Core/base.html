@@ -142,13 +142,37 @@
                 const end = this.selectionEnd;
 
                 const tabValue = "    "
-                // set textarea value to: text before caret + tab + text after caret
-                this.value = this.value.substring(0, start) +
-                    tabValue + this.value.substring(end);
 
-                // put caret at right position again
-                this.selectionStart =
-                    this.selectionEnd = start + tabValue.length;
+                // Allow for indenting a selection
+                if(start !== end){
+                    // go back to linebreak before start of the selection
+                    let i = start;
+                    while (i !== 0 && this.value[i] !== '\n') i--;
+
+                    console.log("Inserting tab at:" + this.value[i]);
+                    // add a tab at the start of the first line
+                    this.value = this.value.substring(0, i) +
+                        tabValue + this.value.substring(i);
+
+                    // Now iterate through all lines within the selection
+                    while(i < end){
+                        while (i < end && this.value[i] !== '\n') i++;
+                        if(i === end) break
+                        i++;
+                        // insert tab
+                        this.value = this.value.substring(0, i) +
+                            tabValue + this.value.substring(i);
+                    }
+                }else{
+
+                    // set textarea value to: text before caret + tab + text after caret
+                    this.value = this.value.substring(0, start) +
+                        tabValue + this.value.substring(end);
+
+                    // put caret at right position again
+                    this.selectionStart =
+                        this.selectionEnd = start + tabValue.length;
+                }
             }
         });
 
