@@ -58,7 +58,7 @@ public static partial class Program
     public static partial void Log (string msg);
     
     [JSFunction] // Set in JS as Program.applyRecomposition = () => ..
-    public static partial void ApplyRecomposition (string newBody); 
+    public static partial void ApplyRecomposition (string newBody, float time); 
     
     [JSFunction]
     public static partial void ShowError (string message);
@@ -105,7 +105,7 @@ public static partial class Program
             string html = Composable.ExecuteAndGetHtml(ast);
             sw.Stop();
             Log($"Recomposition took {sw.Elapsed.TotalMilliseconds}ms");
-            ApplyRecomposition(html);
+            ApplyRecomposition(html, (float) sw.Elapsed.TotalMilliseconds);
         }
         catch (LanguageException e)
         {

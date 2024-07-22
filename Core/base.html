@@ -97,18 +97,21 @@
         // Importing compiled ES module.
         import bootsharp, {Program} from "./index.js";
 
-
         var lastFocusId;
         var selectionStart;
         var selectionEnd;
+        let recompositionCount = 0;
+        let recompositionTime = 0;
         // Binding 'Program.GetFrontendName' import invoked in C
         Program.log = (msg) => console.log(msg);
         // Subscribing to 'Program.OnMainInvoked'
 
-        Program.applyRecomposition = (html) => {
+        Program.applyRecomposition = (html, time) => {
             document.getElementById("root-container").innerHTML = html;
-            
-            
+
+            recompositionCount++;
+            recompositionTime = time
+            updateDebugStats()
             if(lastFocusId !== "") {
                 let focused = document.getElementById(lastFocusId);
                 if(focused === null) return;
@@ -123,6 +126,11 @@
             lastFocusId = document.activeElement.id
             selectionStart = document.activeElement.selectionStart
             selectionEnd = document.activeElement.selectionEnd
+        }
+        
+        function updateDebugStats(){
+            document.getElementById("recomposition_count_span").innerHTML = `Recomposition count: ${recompositionCount}`;
+            document.getElementById("recomposition_time_span").innerHTML = `Last recomposition time: ${recompositionTime}ms`;
         }
 
         Program.showError = (msg) => {
@@ -184,6 +192,8 @@
         document.run = function () {
             // Clear errors
             document.getElementById("errorContainer").innerHTML = "";
+            recompositionCount = 0;
+            updateDebugStats()
             Program.setSourcecode(document.getElementById("sourceCode").value);
         }
         document.recompose = function () {
@@ -227,6 +237,8 @@
 <div class="block">
     <button onclick="document.run()" class="control-button">Run</button>
     <button onclick="document.recompose()" class="control-button">Recompose</button>
+    <span id="recomposition_count_span" style="margin-right: 15pt; margin-left: 15pt">Recomposition count: 0</span>
+    <span id="recomposition_time_span" style="margin-right: 15pt; margin-left: 15pt">Last recomposition time: 0ms</span>
 </div>
 
 <div class="block">
