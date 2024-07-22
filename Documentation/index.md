@@ -5,3 +5,7 @@ You can access the live editor for both at: https://zenonet.de/interactive/webco
 
 Contents of this documentation:
 - [Basic syntax](syntax.md)
+- [Data types](dataTypes.md)
+- Composables
+  - [Layout composables](layoutComposables.md)
+  - [other composables](otherComposables.md)

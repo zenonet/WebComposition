@@ -43,6 +43,8 @@ I hope you have a little fun playing around with this :)
 If you'd like to try out using WebComposition yourself, consider adding a reset button to the counter example above.<br>
 If you create other interesting stuff with this, you could create a pull request with a new example script.
 
+If you want to learn more or look up something consider reading [the documentation](Documentation/index.md)
+
 ## What makes WebComposition unique?
 
 WebComposition is heavily inspired by Jetpack Compose for Android however in constrast to Jetpack Compose, WebComposition runs in the Web and
