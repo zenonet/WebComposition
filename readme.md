@@ -4,6 +4,9 @@ WebComposition is a composition based UI Framework for the web. It is based on a
 The Programming Language is an interpreted language and the interpreter is written in C# meaning it can run nearly everywhere but most importantly:
 in the Web as WASM.
 
+![1000018602](https://github.com/user-attachments/assets/5f242b83-1cdb-417d-9b8c-e6d7e19a6b83)
+
+
 ## Quickstart
 
 The easiest way to run WebComposition for yourself is to use the Live Editor hosted [here](https://zenonet.de/interactive/webcomposition).
